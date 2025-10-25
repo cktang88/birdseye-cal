@@ -1,4 +1,4 @@
-import type { GridCell as GridCellType } from '../../types';
+import type { GridCell as GridCellType } from "../../types";
 
 interface GridCellProps {
   cell: GridCellType;
@@ -20,11 +20,12 @@ export function GridCell({
   return (
     <div
       className={`
+        w-full h-full
         border border-gray-200
         hover:bg-blue-50
         cursor-pointer
         transition-colors
-        ${isInDragSelection ? 'bg-blue-100' : 'bg-white'}
+        ${isInDragSelection ? "bg-blue-100" : "bg-white"}
       `}
       onClick={() => onCellClick(cell)}
       onMouseDown={() => onCellMouseDown(cell)}

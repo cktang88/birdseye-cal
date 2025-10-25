@@ -1,14 +1,17 @@
-import { useState } from 'react';
-import { CalendarGrid } from './components/Calendar/CalendarGrid';
-import { EventBar } from './components/Calendar/EventBar';
-import { EventModal } from './components/Modal/EventModal';
-import { useEventStore } from './store/eventStore';
-import type { Event, GridCell, EventFormData } from './types';
-import { toISODateString, randomColor } from './utils/dateHelpers';
+import { useState } from "react";
+import { CalendarGrid } from "./components/Calendar/CalendarGrid";
+import { EventBar } from "./components/Calendar/EventBar";
+import { EventModal } from "./components/Modal/EventModal";
+import { useEventStore } from "./store/eventStore";
+import type { Event, GridCell, EventFormData } from "./types";
+import { toISODateString, randomColor } from "./utils/dateHelpers";
 
 function App() {
   const currentYear = new Date().getFullYear();
-  const [yearRange] = useState({ start: currentYear - 2, end: currentYear + 3 });
+  const [yearRange] = useState({
+    start: currentYear - 2,
+    end: currentYear + 3,
+  });
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -84,18 +87,31 @@ function App() {
         {/* Event Bars Overlay */}
         <div className="absolute top-0 left-0 pointer-events-none p-4">
           <div className="inline-block">
+            {/* Header space to match grid header */}
+            <div className="flex mb-2">
+              <div className="w-16 shrink-0" />
+              <div className="flex gap-1">
+                {Array.from({ length: maxWeeks }, (_, i) => (
+                  <div key={i} className="w-12" />
+                ))}
+              </div>
+            </div>
+
             {/* Year rows */}
             {Array.from(
               { length: yearRange.end - yearRange.start + 1 },
               (_, i) => yearRange.start + i
             ).map((year) => (
-              <div key={year} className="flex mb-1">
+              <div key={year} className="flex mb-2">
                 {/* Year label space */}
-                <div className="w-16 flex-shrink-0" />
+                <div className="w-16 shrink-0" />
 
                 {/* Event bars for this year */}
-                <div className="relative" style={{ height: '12px' }}>
-                  <div className="pointer-events-auto">
+                <div className="relative flex gap-1" style={{ height: "48px" }}>
+                  {Array.from({ length: maxWeeks }, (_, i) => (
+                    <div key={i} className="w-12 h-12" />
+                  ))}
+                  <div className="absolute inset-0 pointer-events-auto">
                     {events.map((event) => (
                       <EventBar
                         key={event.id}

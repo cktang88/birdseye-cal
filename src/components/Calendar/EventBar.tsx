@@ -1,5 +1,5 @@
-import type { Event } from '../../types';
-import { getGridPosition, fromISODateString } from '../../utils/dateHelpers';
+import type { Event } from "../../types";
+import { getGridPosition, fromISODateString } from "../../utils/dateHelpers";
 
 interface EventBarProps {
   event: Event;
@@ -8,7 +8,12 @@ interface EventBarProps {
   onEventClick: (event: Event) => void;
 }
 
-export function EventBar({ event, year, maxWeeks, onEventClick }: EventBarProps) {
+export function EventBar({
+  event,
+  year,
+  maxWeeks,
+  onEventClick,
+}: EventBarProps) {
   const startDate = fromISODateString(event.startDate);
   const endDate = fromISODateString(event.endDate);
 
@@ -24,10 +29,10 @@ export function EventBar({ event, year, maxWeeks, onEventClick }: EventBarProps)
   const barStartWeek = startPos.year === year ? startPos.week : 1;
   const barEndWeek = endPos.year === year ? endPos.week : maxWeeks;
 
-  // Position in pixels (assuming 12px per cell + 1px gap)
-  const cellWidth = 13; // 12px width + 1px gap
+  // Position in pixels (48px per cell + 4px gap)
+  const cellWidth = 52; // 48px width + 4px gap (w-12 + gap-1)
   const left = (barStartWeek - 1) * cellWidth;
-  const width = (barEndWeek - barStartWeek + 1) * cellWidth - 1; // -1 to account for gap
+  const width = (barEndWeek - barStartWeek + 1) * cellWidth - 4; // -4 to account for gap
 
   return (
     <div
