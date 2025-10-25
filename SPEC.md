@@ -207,7 +207,14 @@ Visit http://localhost:5173 to view the app.
 
 
 
+## Recent Updates
+- [x] Updated to support up to 6 overlapping events per year (previously 4)
+- [x] Doubled cell width from 64px to 128px for better visibility
+- [x] Optimized cell height to 100px for balanced event visibility
+- [x] Adjusted lane height to 84px to accommodate up to 6 events
+- [x] Added more spacing between year rows (mb-4 instead of mb-2)
+- [x] Year rows now have optimal vertical space for event display
+
 TODOS:
-- need to handle up to 6 events, year rows need more height, cells more height, cells still need more width
 - person can enter bday, will have a little number over how old they are each yr
 - ability for event to be added on specific calendar, switch calendar on dropdown

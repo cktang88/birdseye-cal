@@ -19,9 +19,9 @@ export function GridCell({
 }: GridCellProps) {
   return (
     <div
-      // w-16 = CELL_WIDTH_PX (64px), h-12 = CELL_HEIGHT_PX (48px)
+      // w-32 = CELL_WIDTH_PX (128px), h-25 = CELL_HEIGHT_PX (100px)
       className={`
-        w-16 h-12
+        w-32 h-25
         border border-gray-100
         hover:bg-blue-100
         cursor-pointer

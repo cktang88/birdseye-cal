@@ -16,8 +16,8 @@ interface EventBarProps {
   event: Event;
   year: number;
   maxMonths: number;
-  lane: number; // 0-3, determines vertical position
-  maxLanesUsed: number; // Number of overlapping events (1-4) for dynamic height
+  lane: number; // 0-5, determines vertical position
+  maxLanesUsed: number; // Number of overlapping events (1-6) for dynamic height
   onEventClick: (event: Event) => void;
 }
 
@@ -74,7 +74,7 @@ export function EventBar({
 
   // Calculate dynamic height based on number of overlapping events
   // Minimum of 2 lanes to ensure single events are 50% of max height
-  const eventHeight = LANE_HEIGHT_PX / Math.max(maxLanesUsed, 2);
+  const eventHeight = LANE_HEIGHT_PX / Math.max(maxLanesUsed, 3);
 
   // Calculate vertical position based on lane
   const top = lane * eventHeight + LANE_TOP_OFFSET_PX;

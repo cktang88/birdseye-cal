@@ -150,7 +150,7 @@ export function CalendarGrid({
             {monthNames.map((monthName, index) => (
               <div
                 key={index}
-                className="w-16 text-xs text-gray-600 text-center"
+                className="w-32 text-xs text-gray-600 text-center"
               >
                 {monthName}
               </div>
@@ -163,7 +163,7 @@ export function CalendarGrid({
           const cells = cellsByYear.get(year)!;
 
           return (
-            <div key={year} className="flex mb-2">
+            <div key={year} className="flex mb-4">
               {/* Year label - w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
               <div className="w-16 shrink-0 text-sm font-medium text-gray-700 pr-2 text-right select-none">
                 {year}
