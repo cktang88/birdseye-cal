@@ -242,3 +242,51 @@ export function parseDurationAndCalculateEndDate(
 
     return toISODateString(end);
   };
+
+/**
+ * Calculate duration string from start and end dates
+ * Returns a duration string like "3m" or "1.5y"
+ */
+export function calculateDurationFromDates(
+  startDate: string,
+  endDate: string
+): string {
+  if (!startDate || !endDate) return "1m";
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // Calculate difference in milliseconds
+  const diffMs = end.getTime() - start.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+  // If less than 7 days, return in days
+  if (diffDays < 7) {
+    return `${Math.max(1, Math.round(diffDays))}d`;
+  }
+
+  // If less than 60 days, return in weeks
+  if (diffDays < 60) {
+    const weeks = diffDays / 7;
+    return `${Math.round(weeks * 10) / 10}w`;
+  }
+
+  // Calculate month difference
+  const startYear = start.getFullYear();
+  const startMonth = start.getMonth();
+  const endYear = end.getFullYear();
+  const endMonth = end.getMonth();
+
+  const monthDiff = (endYear - startYear) * 12 + (endMonth - startMonth) + 1;
+
+  // If less than 12 months, return in months
+  if (monthDiff < 12) {
+    return `${Math.max(1, monthDiff)}m`;
+  }
+
+  // Return in years
+  const years = monthDiff / 12;
+  // Round to 1 decimal place
+  const roundedYears = Math.round(years * 10) / 10;
+  return `${roundedYears}y`;
+}

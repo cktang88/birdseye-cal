@@ -6,7 +6,11 @@ import { Dropdown } from "./components/ui/Dropdown";
 import { useEventStore } from "./store/eventStore";
 import { useUserStore, DEFAULT_CALENDAR_ID } from "./store/userStore";
 import type { Event, GridCell, EventFormData } from "./types";
-import { toISODateString, randomColor } from "./utils/dateHelpers";
+import {
+  toISODateString,
+  randomColor,
+  calculateDurationFromDates,
+} from "./utils/dateHelpers";
 import { calculateEventLanes } from "./utils/eventLayout";
 
 function App() {
@@ -38,12 +42,16 @@ function App() {
       [startDate, endDate] = [endDate, startDate];
     }
 
+    // Calculate duration from the drag selection
+    const duration = calculateDurationFromDates(startDate, endDate);
+
     setModalState({
       isOpen: true,
       initialData: {
         startDate,
         endDate,
         color: randomColor(),
+        duration,
       },
     });
   };

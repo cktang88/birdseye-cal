@@ -80,7 +80,8 @@ export function EventModal({
         });
         setIsManualColorChange(false); // New event, allow auto color matching
         setUseDurationMode(true); // Default to duration mode for new events
-        setDurationInput(initialData.duration || "1m"); // Default to 1 month
+        // Use the calculated duration from drag selection, or default to 1 month
+        setDurationInput(initialData.duration || "1m");
       }
       setErrors([]);
       setAutocompleteSuggestion("");
