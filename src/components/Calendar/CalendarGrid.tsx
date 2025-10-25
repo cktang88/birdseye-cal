@@ -161,7 +161,7 @@ export function CalendarGrid({
           return (
             <div key={year} className="flex mb-2">
               {/* Year label - w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
-              <div className="w-16 shrink-0 text-sm font-medium text-gray-700 pr-2 text-right">
+              <div className="w-16 shrink-0 text-sm font-medium text-gray-700 pr-2 text-right select-none">
                 {year}
               </div>
 
