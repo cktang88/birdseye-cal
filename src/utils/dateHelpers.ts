@@ -1,39 +1,31 @@
 import {
-  startOfYear,
-  endOfYear,
-  eachWeekOfInterval,
   getYear,
+  getMonth,
   format,
   parseISO,
-  startOfWeek
+  startOfMonth
 } from 'date-fns';
 import type { GridCell } from '../types';
 import { EVENT_COLORS } from '../constants/grid';
 
 /**
  * Generate all grid cells for a given year range
- * Each cell represents a week in a specific year
+ * Each cell represents a month in a specific year
  */
 export function generateGridCells(startYear: number, endYear: number): GridCell[] {
   const cells: GridCell[] = [];
 
   for (let year = startYear; year <= endYear; year++) {
-    const yearStart = startOfYear(new Date(year, 0, 1));
-    const yearEnd = endOfYear(new Date(year, 0, 1));
-
-    const weeks = eachWeekOfInterval(
-      { start: yearStart, end: yearEnd },
-      { weekStartsOn: 1 } // Monday
-    );
-
-    weeks.forEach((weekStart, index) => {
-      const weekNumber = index + 1; // Sequential week number (1, 2, 3, etc.)
+    for (let month = 1; month <= 12; month++) {
+      // Create date for first day of this month
+      const monthStart = new Date(year, month - 1, 1);
+      
       cells.push({
         year,
-        week: weekNumber,
-        date: weekStart
+        month,
+        date: monthStart
       });
-    });
+    }
   }
 
   return cells;
@@ -56,50 +48,29 @@ export function fromISODateString(dateString: string): Date {
 /**
  * Get grid position for a given date
  */
-export function getGridPosition(date: Date): { year: number; week: number } {
+export function getGridPosition(date: Date): { year: number; month: number } {
   const year = getYear(date);
+  const month = getMonth(date) + 1; // getMonth returns 0-11, we want 1-12
   
-  // Find which week this date falls into using the same logic as generateGridCells
-  const yearStart = startOfYear(new Date(year, 0, 1));
-  const yearEnd = endOfYear(new Date(year, 0, 1));
-  
-  const weeks = eachWeekOfInterval(
-    { start: yearStart, end: yearEnd },
-    { weekStartsOn: 1 }
-  );
-  
-  // Find which week this date falls into
-  for (let i = 0; i < weeks.length; i++) {
-    const weekStart = weeks[i];
-    const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000); // Add 6 days
-    if (date >= weekStart && date <= weekEnd) {
-      return {
-        year,
-        week: i + 1 // Sequential week number
-      };
-    }
-  }
-  
-  // Fallback to first week
   return {
     year,
-    week: 1
+    month
   };
 }
 
 /**
- * Calculate if a date falls within a specific year-week cell
+ * Calculate if a date falls within a specific year-month cell
  */
 export function isDateInCell(date: Date, cell: GridCell): boolean {
   const datePos = getGridPosition(date);
-  return datePos.year === cell.year && datePos.week === cell.week;
+  return datePos.year === cell.year && datePos.month === cell.month;
 }
 
 /**
- * Get the start of week for a given date
+ * Get the start of month for a given date
  */
-export function getWeekStart(date: Date): Date {
-  return startOfWeek(date, { weekStartsOn: 1 });
+export function getMonthStart(date: Date): Date {
+  return startOfMonth(date);
 }
 
 /**
@@ -118,25 +89,16 @@ export function randomColor(): string {
 }
 
 /**
- * Get month boundaries based on actual calendar days
- * Returns array of { month: string, dayPosition: number } for each month
- * dayPosition represents cumulative days from start of year
+ * Get month names
  */
-export function getMonthBoundaries(): Array<{ month: string; dayPosition: number }> {
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  // Days in each month (ignoring leap years as requested)
-  const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  
-  const boundaries: Array<{ month: string; dayPosition: number }> = [];
-  let cumulativeDays = 0;
-  
-  for (let i = 0; i < 12; i++) {
-    boundaries.push({
-      month: monthNames[i],
-      dayPosition: cumulativeDays
-    });
-    cumulativeDays += daysInMonth[i];
-  }
-  
-  return boundaries;
+export function getMonthNames(): string[] {
+  return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+}
+
+/**
+ * Get month name for a given month number (1-12)
+ */
+export function getMonthName(month: number): string {
+  const monthNames = getMonthNames();
+  return monthNames[month - 1] || '';
 }

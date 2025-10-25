@@ -1,7 +1,7 @@
 # BirdsEye Calendar - Product Specification
 
 ## Overview
-A frontend-only React application for visualizing long-running events across months and years. Events are displayed as horizontal bars on a grid where the x-axis represents weeks/months and the y-axis represents years.
+A frontend-only React application for visualizing long-running events across months and years. Events are displayed as horizontal bars on a grid where the x-axis represents months and the y-axis represents years.
 
 ## Tech Stack
 - React + Vite + TypeScript
@@ -13,10 +13,10 @@ A frontend-only React application for visualizing long-running events across mon
 ## Core Features
 
 ### 1. Calendar Grid Visualization
-- **X-axis**: Weeks of the year (1-52/53)
+- **X-axis**: Months of the year (1-12)
 - **Y-axis**: Years (configurable range, default: current year ± 5 years)
-- Grid layout with visible cells for each week-year intersection
-- Similar visual style to "90-Year Human Life in Weeks" grid
+- Grid layout with visible cells for each month-year intersection
+- Each cell represents one month in a specific year
 
 ### 2. Event System
 
@@ -91,7 +91,7 @@ type Event = {
 ### 6. UI Components
 
 #### CalendarGrid
-- Renders year rows and week columns
+- Renders year rows and month columns
 - Handles click and drag interactions
 - Displays all event bars
 
@@ -164,7 +164,7 @@ birdseye-cal/
 
 ## MVP Scope
 **Include:**
-- Grid visualization (weeks × years)
+- Grid visualization (months × years)
 - Click to create events
 - Click & drag to create events
 - Event modal with native inputs

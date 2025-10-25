@@ -32,7 +32,7 @@ export function GridCell({
       onMouseDown={() => onCellMouseDown(cell)}
       onMouseEnter={() => onCellMouseEnter(cell)}
       onMouseUp={() => onCellMouseUp(cell)}
-      title={`Year ${cell.year}, Week ${cell.week}`}
+      title={`Year ${cell.year}, Month ${cell.month}`}
     />
   );
 }

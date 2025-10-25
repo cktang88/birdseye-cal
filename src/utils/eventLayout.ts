@@ -32,34 +32,34 @@ export function calculateEventLanes(
       }
 
       // Calculate the bar position within this year
-      const barStartWeek = startPos.year === year ? startPos.week : 1;
-      const barEndWeek = endPos.year === year ? endPos.week : 53;
+      const barStartMonth = startPos.year === year ? startPos.month : 1;
+      const barEndMonth = endPos.year === year ? endPos.month : 12;
 
       return {
         event,
-        startWeek: barStartWeek,
-        endWeek: barEndWeek,
+        startMonth: barStartMonth,
+        endMonth: barEndMonth,
       };
     })
     .filter((e) => e !== null)
-    .sort((a, b) => a!.startWeek - b!.startWeek);
+    .sort((a, b) => a!.startMonth - b!.startMonth);
 
-  // Track which lanes are occupied by which week ranges
-  // lanes[i] = endWeek of the event currently occupying lane i (or -1 if free)
+  // Track which lanes are occupied by which month ranges
+  // lanes[i] = endMonth of the event currently occupying lane i (or -1 if free)
   const lanes: number[] = [-1, -1, -1, -1]; // Support up to 4 lanes
 
   for (const item of yearEvents) {
     if (!item) continue;
 
-    const { event, startWeek, endWeek } = item;
+    const { event, startMonth, endMonth } = item;
 
     // Find the first available lane (topmost lane that's free)
     let assignedLane = -1;
     for (let lane = 0; lane < lanes.length; lane++) {
-      if (lanes[lane] < startWeek) {
-        // This lane is free at the start week
+      if (lanes[lane] < startMonth) {
+        // This lane is free at the start month
         assignedLane = lane;
-        lanes[lane] = endWeek;
+        lanes[lane] = endMonth;
         break;
       }
     }
@@ -67,7 +67,7 @@ export function calculateEventLanes(
     // If no lane found, assign to lane 0 (will overlap, but better than nothing)
     if (assignedLane === -1) {
       assignedLane = 0;
-      lanes[0] = endWeek;
+      lanes[0] = endMonth;
     }
 
     laneMap.set(event.id, assignedLane);

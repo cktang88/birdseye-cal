@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import type { GridCell as GridCellType, DragState, Event } from "../../types";
-import { generateGridCells, getMonthBoundaries } from "../../utils/dateHelpers";
+import { generateGridCells, getMonthNames } from "../../utils/dateHelpers";
 import { GridCell } from "./GridCell";
 import { EventBar } from "./EventBar";
 import type { EventLayoutInfo } from "../../utils/eventLayout";
@@ -116,7 +116,7 @@ export function CalendarGrid({
     const end = dragState.endCell;
 
     // Calculate cell index for comparison
-    const getCellIndex = (c: GridCellType) => c.year * 100 + c.week;
+    const getCellIndex = (c: GridCellType) => c.year * 100 + c.month;
     const cellIndex = getCellIndex(cell);
     const startIndex = getCellIndex(start);
     const endIndex = getCellIndex(end);
@@ -127,13 +127,13 @@ export function CalendarGrid({
     return cellIndex >= minIndex && cellIndex <= maxIndex;
   };
 
-  // Get max weeks to normalize grid width
-  const maxWeeks = Math.max(
+  // Get max months to normalize grid width (should always be 12)
+  const maxMonths = Math.max(
     ...Array.from(cellsByYear.values()).map((cells) => cells.length)
   );
 
-  // Get month boundaries based on actual calendar days
-  const monthBoundaries = useMemo(() => getMonthBoundaries(), []);
+  // Get month names for header
+  const monthNames = useMemo(() => getMonthNames(), []);
 
   return (
     <div
@@ -146,23 +146,15 @@ export function CalendarGrid({
         <div className="flex mb-2 relative">
           {/* w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
           <div className="w-16 shrink-0" /> {/* Year label space */}
-          <div
-            className="relative block h-4"
-            style={{ width: `${maxWeeks * 28}px` }}
-          >
-            {monthBoundaries.map((boundary) => {
-              // Convert days to week position: dayPosition / 7 * (CELL_WIDTH_PX + CELL_GAP_PX)
-              const leftPosition = (boundary.dayPosition / 7) * 28;
-              return (
-                <div
-                  key={boundary.month}
-                  className="absolute text-xs text-gray-600"
-                  style={{ left: `${leftPosition}px` }}
-                >
-                  {boundary.month}
-                </div>
-              );
-            })}
+          <div className="flex gap-1">
+            {monthNames.map((monthName, index) => (
+              <div
+                key={index}
+                className="w-6 text-xs text-gray-600 text-center"
+              >
+                {monthName}
+              </div>
+            ))}
           </div>
         </div>
 
@@ -177,11 +169,11 @@ export function CalendarGrid({
                 {year}
               </div>
 
-              {/* Week cells with event bars overlay - gap-1 = CELL_GAP_PX (4px) */}
+              {/* Month cells with event bars overlay - gap-1 = CELL_GAP_PX (4px) */}
               <div className="relative flex gap-1">
                 {cells.map((cell) => (
                   <GridCell
-                    key={`${cell.year}-${cell.week}`}
+                    key={`${cell.year}-${cell.month}`}
                     cell={cell}
                     onCellClick={handleCellClick}
                     onCellMouseDown={handleCellMouseDown}
@@ -190,21 +182,6 @@ export function CalendarGrid({
                     isInDragSelection={isCellInDragSelection(cell)}
                   />
                 ))}
-
-                {/* Month boundary lines */}
-                {monthBoundaries.map((boundary) => {
-                  if (boundary.dayPosition === 0) return null; // Don't show line at the very start
-                  // Convert days to pixel position: dayPosition / 7 * (CELL_WIDTH_PX + CELL_GAP_PX)
-                  // Subtract CELL_GAP_PX/2 to account for the gap
-                  const leftPosition = (boundary.dayPosition / 7) * 28 - 2;
-                  return (
-                    <div
-                      key={`${year}-${boundary.month}`}
-                      className="absolute top-0 bottom-0 w-0.25 bg-gray-800 pointer-events-none"
-                      style={{ left: `${leftPosition}px` }}
-                    />
-                  );
-                })}
 
                 {/* Event bars overlay for this year */}
                 <div className="absolute inset-0 pointer-events-none">
@@ -217,7 +194,7 @@ export function CalendarGrid({
                         key={event.id}
                         event={event}
                         year={year}
-                        maxWeeks={maxWeeks}
+                        maxMonths={maxMonths}
                         lane={lane}
                         maxLanesUsed={maxLanesUsed}
                         onEventClick={onEventClick}

@@ -8,8 +8,8 @@ export type Event = {
 
 export type GridCell = {
   year: number;
-  week: number; // 1-52/53
-  date: Date;   // First day of that week
+  month: number; // 1-12
+  date: Date;    // First day of that month
 }
 
 export type EventFormData = {
