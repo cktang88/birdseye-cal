@@ -133,11 +133,11 @@ export function CalendarGrid({
       <div className="inline-block">
         {/* Header: Week numbers */}
         <div className="flex mb-2">
-          <div className="w-16 flex-shrink-0" /> {/* Year label space */}
+          <div className="w-16 shrink-0" /> {/* Year label space */}
           {Array.from({ length: maxWeeks }, (_, i) => (
             <div
               key={i}
-              className="w-12 text-xs text-gray-400 text-center flex-shrink-0"
+              className="w-12 text-xs text-gray-400 text-center shrink-0"
             >
               {(i + 1) % 5 === 0 ? i + 1 : ""}
             </div>
@@ -151,23 +151,22 @@ export function CalendarGrid({
           return (
             <div key={year} className="flex mb-2">
               {/* Year label */}
-              <div className="w-16 flex-shrink-0 text-sm font-medium text-gray-700 pr-2 text-right">
+              <div className="w-16 shrink-0 text-sm font-medium text-gray-700 pr-2 text-right">
                 {year}
               </div>
 
               {/* Week cells */}
               <div className="flex gap-1">
                 {cells.map((cell) => (
-                  <div key={`${cell.year}-${cell.week}`} className="w-12 h-12">
-                    <GridCell
-                      cell={cell}
-                      onCellClick={handleCellClick}
-                      onCellMouseDown={handleCellMouseDown}
-                      onCellMouseEnter={handleCellMouseEnter}
-                      onCellMouseUp={handleCellMouseUp}
-                      isInDragSelection={isCellInDragSelection(cell)}
-                    />
-                  </div>
+                  <GridCell
+                    key={`${cell.year}-${cell.week}`}
+                    cell={cell}
+                    onCellClick={handleCellClick}
+                    onCellMouseDown={handleCellMouseDown}
+                    onCellMouseEnter={handleCellMouseEnter}
+                    onCellMouseUp={handleCellMouseUp}
+                    isInDragSelection={isCellInDragSelection(cell)}
+                  />
                 ))}
               </div>
             </div>

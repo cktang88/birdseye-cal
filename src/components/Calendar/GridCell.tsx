@@ -20,7 +20,7 @@ export function GridCell({
   return (
     <div
       className={`
-        w-full h-full
+        w-12 h-12
         border border-gray-300
         hover:bg-blue-100
         cursor-pointer

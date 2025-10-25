@@ -111,7 +111,7 @@ function App() {
                   {Array.from({ length: maxWeeks }, (_, i) => (
                     <div key={i} className="w-12 h-12" />
                   ))}
-                  <div className="absolute inset-0 pointer-events-auto">
+                  <div className="absolute inset-0">
                     {events.map((event) => (
                       <EventBar
                         key={event.id}

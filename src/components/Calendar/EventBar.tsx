@@ -36,7 +36,7 @@ export function EventBar({
 
   return (
     <div
-      className="absolute h-10 rounded cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+      className="absolute h-10 rounded cursor-pointer hover:opacity-80 transition-opacity overflow-hidden pointer-events-auto"
       style={{
         backgroundColor: event.color,
         left: `${left}px`,
