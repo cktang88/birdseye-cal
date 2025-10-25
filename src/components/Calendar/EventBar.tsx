@@ -11,6 +11,7 @@ import {
   LANE_HEIGHT_PX,
   LANE_TOP_OFFSET_PX,
 } from "../../constants/grid";
+import { getDarkerTextColor } from "../../utils/colorHelpers";
 
 interface EventBarProps {
   event: Event;
@@ -93,15 +94,32 @@ export function EventBar({
       ? "leading-3"
       : "leading-[10px]";
 
+  // Determine rounded corners based on whether event starts/ends in this year
+  // Only round corners at the actual beginning and end of the event
+  const isEventStart = startPos.year === year;
+  const isEventEnd = endPos.year === year;
+
+  const BORDER_RADIUS_PX = "12px";
+
+  const borderRadius = `${isEventStart ? BORDER_RADIUS_PX : "0px"} ${
+    isEventEnd ? BORDER_RADIUS_PX : "0px"
+  } ${isEventEnd ? BORDER_RADIUS_PX : "0px"} ${
+    isEventStart ? BORDER_RADIUS_PX : "0px"
+  }`;
+
+  // Get darker text color based on background color (Apple Calendar style)
+  const textColor = getDarkerTextColor(event.color);
+
   return (
     <div
-      className="absolute rounded cursor-pointer hover:opacity-80 transition-opacity overflow-hidden pointer-events-auto flex items-center"
+      className="absolute cursor-pointer hover:opacity-80 transition-opacity overflow-hidden pointer-events-auto flex items-center"
       style={{
         backgroundColor: event.color,
         left: `${left}px`,
         width: `${width}px`,
         top: `${top}px`,
         height: `${eventHeight}px`,
+        borderRadius,
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -110,7 +128,8 @@ export function EventBar({
       title={event.name}
     >
       <span
-        className={`${textSize} ${lineHeight} text-white font-medium px-1.5 whitespace-nowrap truncate`}
+        className={`${textSize} ${lineHeight} font-medium px-1.5 whitespace-nowrap truncate`}
+        style={{ color: textColor }}
       >
         {event.name}
       </span>

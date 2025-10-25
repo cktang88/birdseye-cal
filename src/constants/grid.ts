@@ -15,18 +15,20 @@ export const CELL_TOTAL_WIDTH_PX = CELL_WIDTH_PX + CELL_GAP_PX; // 128px
 export const LANE_HEIGHT_PX = 84; // Height for event lanes (divided by number of overlapping events, supports up to 6)
 export const LANE_TOP_OFFSET_PX = 4; // Top padding before first lane
 
-// Color palette for events (Tailwind 400 colors)
+// Color palette for events (Apple Calendar inspired colors - lighter/pastel versions)
 export const EVENT_COLORS = [
-  '#60a5fa', // blue-400
-  '#34d399', // emerald-400
-  '#a78bfa', // violet-400
-  '#fb923c', // orange-400
-  '#f472b6', // pink-400
-  '#facc15', // yellow-400
-  '#2dd4bf', // teal-400
-  '#f87171', // red-400
-  '#a3e635', // lime-400
-  '#c084fc', // purple-400
+  '#FFB3B0', // Red (soft red)
+  '#FFD699', // Orange (peach)
+  '#FFE799', // Yellow (butter yellow)
+  '#A8E6B8', // Green (mint green)
+  '#91D4E8', // Cyan (turquoise - balanced blue-green)
+  '#A8D5FF', // Sky Blue (distinct light blue)
+  '#91B3FA', // Blue (periwinkle - more saturated)
+  '#C4C2F0', // Indigo (lavender)
+  '#E0B3F0', // Purple (lilac)
+  '#FFB3C9', // Pink (cotton candy)
+  '#D4C4B3', // Brown (tan)
+  '#C2C9D1', // Gray (soft slate - neutral, distinct from all colors)
 ] as const;
 
 // Year label dimensions
