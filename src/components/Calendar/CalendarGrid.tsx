@@ -169,9 +169,11 @@ export function CalendarGrid({
           return (
             <div
               key={year}
-              className={`flex ${
-                yearIndex > 0 ? "mt-8 pt-8 border-t-4 border-gray-400" : "mb-4"
-              } ${isEvenYear ? "bg-gray-50" : "bg-white"} -mx-4 px-4 py-2`}
+              className={`flex items-stretch ${
+                yearIndex > 0 ? "border-t-2 border-gray-400" : "mb-4"
+              } ${
+                isEvenYear ? "bg-gray-50" : "bg-white"
+              } -mx-4 px-4 py-8 h-full`}
             >
               {/* Year label - w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
               <div className="w-16 shrink-0 text-base font-bold text-gray-800 pr-2 text-right select-none">

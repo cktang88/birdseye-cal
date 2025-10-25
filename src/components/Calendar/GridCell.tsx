@@ -41,7 +41,8 @@ export function GridCell({
         cursor-pointer
         transition-colors
         relative
-        ${isInDragSelection ? "bg-blue-100" : ""}
+        bg-transparent
+        ${isInDragSelection ? "!bg-blue-100" : ""}
       `}
       onClick={() => onCellClick(cell)}
       onMouseDown={() => onCellMouseDown(cell)}
