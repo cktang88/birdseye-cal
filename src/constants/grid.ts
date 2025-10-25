@@ -6,10 +6,10 @@
 // Cell dimensions (in pixels)
 export const CELL_WIDTH_PX = 128; // 2x original width for better visibility
 export const CELL_HEIGHT_PX = 100; // Optimized height for event visibility
-export const CELL_GAP_PX = 8;
+export const CELL_GAP_PX = 0; // No gap between month cells
 
 // Combined width for positioning calculations (cell + gap)
-export const CELL_TOTAL_WIDTH_PX = CELL_WIDTH_PX + CELL_GAP_PX; // 136px
+export const CELL_TOTAL_WIDTH_PX = CELL_WIDTH_PX + CELL_GAP_PX; // 128px
 
 // Event bar dimensions
 export const LANE_HEIGHT_PX = 84; // Height for event lanes (divided by number of overlapping events, supports up to 6)
@@ -35,6 +35,6 @@ export const YEAR_LABEL_WIDTH_PX = 64; // w-16 = 4rem = 64px
 // Tailwind class equivalents (for reference)
 // w-32 = 128px = CELL_WIDTH_PX
 // h-25 = 100px = CELL_HEIGHT_PX
-// gap-2 = 8px = CELL_GAP_PX
+// CELL_GAP_PX = 0px (no gap)
 // w-16 = 64px = YEAR_LABEL_WIDTH_PX
 

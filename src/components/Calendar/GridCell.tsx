@@ -22,17 +22,26 @@ export function GridCell({
 }: GridCellProps) {
   const age = calculateAgeAtCell(birthday, cell.year, cell.month);
 
+  // Add stronger border for quarter boundaries (months 3, 6, 9, 12)
+  const isQuarterEnd = cell.month % 3 === 0;
+  const isFirstMonth = cell.month === 1;
+
   return (
     <div
       // w-32 = CELL_WIDTH_PX (128px), h-25 = CELL_HEIGHT_PX (100px)
       className={`
         w-32 h-25
-        border border-gray-100
-        hover:bg-blue-100
+        ${
+          isQuarterEnd
+            ? "border-r-2 border-gray-300"
+            : "border-r border-gray-200"
+        }
+        ${isFirstMonth ? "border-l-2 border-gray-300" : ""}
+        hover:bg-blue-50
         cursor-pointer
         transition-colors
         relative
-        ${isInDragSelection ? "bg-blue-100" : "bg-white"}
+        ${isInDragSelection ? "bg-blue-100" : ""}
       `}
       onClick={() => onCellClick(cell)}
       onMouseDown={() => onCellMouseDown(cell)}

@@ -149,7 +149,7 @@ export function CalendarGrid({
         <div className="flex mb-2 relative">
           {/* w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
           <div className="w-16 shrink-0" /> {/* Year label space */}
-          <div className="flex gap-2">
+          <div className="flex">
             {monthNames.map((monthName, index) => (
               <div
                 key={index}
@@ -162,18 +162,24 @@ export function CalendarGrid({
         </div>
 
         {/* Grid rows by year */}
-        {years.map((year) => {
+        {years.map((year, yearIndex) => {
           const cells = cellsByYear.get(year)!;
+          const isEvenYear = yearIndex % 2 === 0;
 
           return (
-            <div key={year} className="flex mb-4">
+            <div
+              key={year}
+              className={`flex ${
+                yearIndex > 0 ? "mt-8 pt-8 border-t-4 border-gray-400" : "mb-4"
+              } ${isEvenYear ? "bg-gray-50" : "bg-white"} -mx-4 px-4 py-2`}
+            >
               {/* Year label - w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
-              <div className="w-16 shrink-0 text-sm font-medium text-gray-700 pr-2 text-right select-none">
+              <div className="w-16 shrink-0 text-base font-bold text-gray-800 pr-2 text-right select-none">
                 {year}
               </div>
 
-              {/* Month cells with event bars overlay - gap-2 = CELL_GAP_PX (8px) */}
-              <div className="relative flex gap-2">
+              {/* Month cells with event bars overlay */}
+              <div className="relative flex">
                 {cells.map((cell) => (
                   <GridCell
                     key={`${cell.year}-${cell.month}`}
