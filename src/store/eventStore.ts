@@ -7,6 +7,7 @@ interface EventStore {
   addEvent: (event: Omit<Event, 'id'>) => void;
   updateEvent: (id: string, event: Partial<Event>) => void;
   deleteEvent: (id: string) => void;
+  deleteEventsByCalendar: (calendarId: string) => void;
   getEvent: (id: string) => Event | undefined;
 }
 
@@ -37,6 +38,12 @@ export const useEventStore = create<EventStore>()(
       deleteEvent: (id) => {
         set((state) => ({
           events: state.events.filter((event) => event.id !== id),
+        }));
+      },
+
+      deleteEventsByCalendar: (calendarId) => {
+        set((state) => ({
+          events: state.events.filter((event) => event.calendarId !== calendarId),
         }));
       },
 

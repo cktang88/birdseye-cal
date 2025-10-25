@@ -19,7 +19,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     cloneCalendar,
     updateCalendar,
   } = useUserStore();
-  const { events, addEvent } = useEventStore();
+  const { events, addEvent, deleteEventsByCalendar } = useEventStore();
   const [birthdayInput, setBirthdayInput] = useState<string>("");
   const [newCalendarName, setNewCalendarName] = useState<string>("");
   const [newCalendarColor, setNewCalendarColor] = useState<string>(
@@ -71,9 +71,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
     if (
       confirm(
-        "Are you sure you want to delete this calendar? Events in this calendar will remain but won't be visible."
+        "Are you sure you want to delete this calendar? All events in this calendar will also be permanently deleted."
       )
     ) {
+      deleteEventsByCalendar(id);
       deleteCalendar(id);
     }
   };
