@@ -1,9 +1,16 @@
+export type Calendar = {
+  id: string;
+  name: string;
+  color: string; // hex color for calendar identification
+}
+
 export type Event = {
   id: string;
   name: string;
   startDate: string; // ISO date string (YYYY-MM-DD)
   endDate: string;   // ISO date string (YYYY-MM-DD)
   color: string;     // hex color (#rrggbb)
+  calendarId?: string; // optional for backward compatibility
 }
 
 export type GridCell = {
@@ -17,6 +24,7 @@ export type EventFormData = {
   startDate: string;
   endDate: string;
   color: string;
+  calendarId?: string;
 }
 
 export type DragState = {

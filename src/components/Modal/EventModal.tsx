@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import type { Event, EventFormData } from "../../types";
 import { toISODateString } from "../../utils/dateHelpers";
 import { EVENT_COLORS } from "../../constants/grid";
+import { useUserStore, DEFAULT_CALENDAR_ID } from "../../store/userStore";
 
 interface EventModalProps {
   isOpen: boolean;
@@ -20,11 +21,14 @@ export function EventModal({
   initialData,
   existingEvent,
 }: EventModalProps) {
+  const { calendars, activeCalendarId } = useUserStore();
+
   const [formData, setFormData] = useState<EventFormData>({
     name: "",
     startDate: "",
     endDate: "",
     color: EVENT_COLORS[0], // Default to first color in palette
+    calendarId: activeCalendarId || DEFAULT_CALENDAR_ID,
   });
 
   const [errors, setErrors] = useState<string[]>([]);
@@ -38,6 +42,7 @@ export function EventModal({
           startDate: existingEvent.startDate,
           endDate: existingEvent.endDate,
           color: existingEvent.color,
+          calendarId: existingEvent.calendarId || DEFAULT_CALENDAR_ID,
         });
       } else if (initialData) {
         // Creating new event with initial data
@@ -49,11 +54,13 @@ export function EventModal({
             initialData.startDate ||
             toISODateString(new Date()),
           color: initialData.color || EVENT_COLORS[0],
+          calendarId:
+            initialData.calendarId || activeCalendarId || DEFAULT_CALENDAR_ID,
         });
       }
       setErrors([]);
     }
-  }, [isOpen, initialData, existingEvent]);
+  }, [isOpen, initialData, existingEvent, activeCalendarId]);
 
   const validate = (): boolean => {
     const newErrors: string[] = [];
@@ -153,6 +160,26 @@ export function EventModal({
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          {/* Calendar Selection */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Calendar
+            </label>
+            <select
+              value={formData.calendarId || DEFAULT_CALENDAR_ID}
+              onChange={(e) =>
+                setFormData({ ...formData, calendarId: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {calendars.map((calendar) => (
+                <option key={calendar.id} value={calendar.id}>
+                  {calendar.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Color */}

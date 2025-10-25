@@ -1,23 +1,88 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import type { Calendar } from "../types";
+
+const DEFAULT_CALENDAR_ID = "default";
 
 interface UserSettings {
   birthday: string | null; // ISO date string (YYYY-MM-DD)
+  calendars: Calendar[];
+  activeCalendarId: string;
 }
 
 interface UserStore extends UserSettings {
   setBirthday: (birthday: string | null) => void;
+  addCalendar: (calendar: Omit<Calendar, "id">) => void;
+  updateCalendar: (id: string, updates: Partial<Omit<Calendar, "id">>) => void;
+  deleteCalendar: (id: string) => void;
+  setActiveCalendar: (id: string) => void;
+  getCalendar: (id: string) => Calendar | undefined;
 }
 
 export const useUserStore = create<UserStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       birthday: null,
+      calendars: [
+        {
+          id: DEFAULT_CALENDAR_ID,
+          name: "Default Calendar",
+          color: "#3b82f6", // blue
+        },
+      ],
+      activeCalendarId: DEFAULT_CALENDAR_ID,
+
       setBirthday: (birthday) => set({ birthday }),
+
+      addCalendar: (calendarData) => {
+        const newCalendar: Calendar = {
+          ...calendarData,
+          id: crypto.randomUUID(),
+        };
+        set((state) => ({
+          calendars: [...state.calendars, newCalendar],
+        }));
+      },
+
+      updateCalendar: (id, updates) => {
+        set((state) => ({
+          calendars: state.calendars.map((cal) =>
+            cal.id === id ? { ...cal, ...updates } : cal
+          ),
+        }));
+      },
+
+      deleteCalendar: (id) => {
+        // Prevent deleting the default calendar
+        if (id === DEFAULT_CALENDAR_ID) return;
+
+        set((state) => {
+          const newCalendars = state.calendars.filter((cal) => cal.id !== id);
+          // If active calendar is deleted, switch to default
+          const newActiveId =
+            state.activeCalendarId === id
+              ? DEFAULT_CALENDAR_ID
+              : state.activeCalendarId;
+          return {
+            calendars: newCalendars,
+            activeCalendarId: newActiveId,
+          };
+        });
+      },
+
+      setActiveCalendar: (id) => {
+        set({ activeCalendarId: id });
+      },
+
+      getCalendar: (id) => {
+        return get().calendars.find((cal) => cal.id === id);
+      },
     }),
     {
       name: "birdseye-user-settings",
     }
   )
 );
+
+export { DEFAULT_CALENDAR_ID };
 
