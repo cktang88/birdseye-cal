@@ -9,7 +9,7 @@ import { calculateEventLanes } from "./utils/eventLayout";
 function App() {
   const currentYear = new Date().getFullYear();
   const [yearRange] = useState({
-    start: currentYear - 2,
+    start: currentYear,
     end: currentYear + 15,
   });
 

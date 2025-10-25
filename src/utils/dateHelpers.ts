@@ -1,6 +1,8 @@
 import {
   getYear,
   getMonth,
+  getDate,
+  getDaysInMonth,
   format,
   parseISO,
   startOfMonth
@@ -101,4 +103,43 @@ export function getMonthNames(): string[] {
 export function getMonthName(month: number): string {
   const monthNames = getMonthNames();
   return monthNames[month - 1] || '';
+}
+
+/**
+ * Get the day of the month for a given date (1-31)
+ */
+export function getDayOfMonth(date: Date): number {
+  return getDate(date);
+}
+
+/**
+ * Get the total number of days in the month for a given date
+ */
+export function getTotalDaysInMonth(date: Date): number {
+  return getDaysInMonth(date);
+}
+
+/**
+ * Calculate the fractional position within a month for a START date (0.0 to ~0.97)
+ * For example, Jan 1 = 0.0, Jan 15 (in 31-day month) ≈ 0.45, Jan 31 ≈ 0.97
+ * This represents the START of the day.
+ */
+export function getMonthFraction(date: Date): number {
+  const day = getDayOfMonth(date);
+  const totalDays = getTotalDaysInMonth(date);
+  // Subtract 1 from day to make the first day start at 0.0
+  // Use (day - 1) / totalDays to get a fraction from 0.0 to ~0.97 (not 1.0)
+  return (day - 1) / totalDays;
+}
+
+/**
+ * Calculate the fractional position within a month for an END date (0.0 to 1.0)
+ * For example, Jan 1 = ~0.032, Jan 15 (in 31-day month) ≈ 0.48, Jan 31 = 1.0
+ * This represents the END of the day (inclusive).
+ */
+export function getMonthFractionEnd(date: Date): number {
+  const day = getDayOfMonth(date);
+  const totalDays = getTotalDaysInMonth(date);
+  // Don't subtract 1, so the end of day 1 = 1/31, end of day 31 = 31/31 = 1.0
+  return day / totalDays;
 }

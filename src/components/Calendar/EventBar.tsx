@@ -1,5 +1,10 @@
 import type { Event } from "../../types";
-import { getGridPosition, fromISODateString } from "../../utils/dateHelpers";
+import {
+  getGridPosition,
+  fromISODateString,
+  getMonthFraction,
+  getMonthFractionEnd,
+} from "../../utils/dateHelpers";
 import {
   CELL_TOTAL_WIDTH_PX,
   CELL_GAP_PX,
@@ -39,10 +44,33 @@ export function EventBar({
   const barStartMonth = startPos.year === year ? startPos.month : 1;
   const barEndMonth = endPos.year === year ? endPos.month : maxMonths;
 
-  // Position in pixels
-  const left = (barStartMonth - 1) * CELL_TOTAL_WIDTH_PX;
+  // Calculate fractional offsets within the months
+  // For start: if event starts in this year, use the day fraction; otherwise start at 0.0
+  const startFraction =
+    startPos.year === year ? getMonthFraction(startDate) : 0.0;
+
+  // For end: if event ends in this year, use the day fraction (inclusive); otherwise end at 1.0 (full month)
+  const endFraction = endPos.year === year ? getMonthFractionEnd(endDate) : 1.0;
+
+  // Position in pixels with fractional offsets
+  // Start position: month cell start + fractional offset within that month
+  const left =
+    (barStartMonth - 1) * CELL_TOTAL_WIDTH_PX +
+    startFraction * CELL_TOTAL_WIDTH_PX;
+
+  // Width calculation:
+  // - Total months spanned in pixels
+  // - Add the end fraction (portion of the end month)
+  // - Subtract the start fraction (portion of start month we're not using)
+  // - Subtract the gap
+  const totalMonthsWidth =
+    (barEndMonth - barStartMonth + 1) * CELL_TOTAL_WIDTH_PX;
   const width =
-    (barEndMonth - barStartMonth + 1) * CELL_TOTAL_WIDTH_PX - CELL_GAP_PX;
+    totalMonthsWidth -
+    startFraction * CELL_TOTAL_WIDTH_PX +
+    endFraction * CELL_TOTAL_WIDTH_PX -
+    CELL_TOTAL_WIDTH_PX -
+    CELL_GAP_PX;
 
   // Calculate dynamic height based on number of overlapping events
   const eventHeight = LANE_HEIGHT_PX / maxLanesUsed;

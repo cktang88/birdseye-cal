@@ -141,16 +141,16 @@ export function CalendarGrid({
       onMouseUp={handleContainerMouseUp}
       onMouseLeave={handleContainerMouseUp}
     >
-      <div className="inline-block">
+      <div className="w-[90%] mx-auto">
         {/* Header: Month labels */}
         <div className="flex mb-2 relative">
           {/* w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
           <div className="w-16 shrink-0" /> {/* Year label space */}
-          <div className="flex gap-1">
+          <div className="flex gap-2">
             {monthNames.map((monthName, index) => (
               <div
                 key={index}
-                className="w-6 text-xs text-gray-600 text-center"
+                className="w-16 text-xs text-gray-600 text-center"
               >
                 {monthName}
               </div>
@@ -169,8 +169,8 @@ export function CalendarGrid({
                 {year}
               </div>
 
-              {/* Month cells with event bars overlay - gap-1 = CELL_GAP_PX (4px) */}
-              <div className="relative flex gap-1">
+              {/* Month cells with event bars overlay - gap-2 = CELL_GAP_PX (8px) */}
+              <div className="relative flex gap-2">
                 {cells.map((cell) => (
                   <GridCell
                     key={`${cell.year}-${cell.month}`}
