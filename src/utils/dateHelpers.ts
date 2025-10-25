@@ -171,3 +171,74 @@ export function calculateAgeAtCell(
 
   return age;
 }
+
+
+  // Parse duration string (e.g., "1.5y", "3m", "1d") and calculate end date
+export function parseDurationAndCalculateEndDate(
+    startDate: string,
+    duration: string
+  ): string | null  {
+    if (!startDate || !duration) return null;
+
+    const match = duration.trim().match(/^(\d+\.?\d*)\s*([ymwdh])$/i);
+    if (!match) return null;
+
+    const value = parseFloat(match[1]);
+    const unit = match[2].toLowerCase();
+
+    const start = new Date(startDate);
+    let end = new Date(start);
+
+    // For fractional values, convert to days for accurate calculation
+    const hasFraction = value % 1 !== 0;
+
+    if (hasFraction) {
+      let daysToAdd = 0;
+      switch (unit) {
+        case "y": // years (approximate: 365.25 days per year)
+          daysToAdd = value * 365.25;
+          break;
+        case "m": // months (approximate: 30.44 days per month)
+          daysToAdd = value * 30.44;
+          break;
+        case "w": // weeks
+          daysToAdd = value * 7;
+          break;
+        case "d": // days
+          daysToAdd = value;
+          break;
+        case "h": // hours
+          end = new Date(start.getTime() + value * 60 * 60 * 1000);
+          return toISODateString(end);
+        default:
+          return null;
+      }
+      // Add days using milliseconds for precision
+      end = new Date(
+        start.getTime() + Math.round(daysToAdd * 24 * 60 * 60 * 1000)
+      );
+    } else {
+      // For whole numbers, use the built-in methods for more accurate month/year handling
+      switch (unit) {
+        case "y": // years
+          end.setFullYear(end.getFullYear() + value);
+          break;
+        case "m": // months
+          end.setMonth(end.getMonth() + value);
+          break;
+        case "w": // weeks
+          end.setDate(end.getDate() + value * 7);
+          break;
+        case "d": // days
+          end.setDate(end.getDate() + value);
+          break;
+        case "h": // hours
+          end.setHours(end.getHours() + value);
+          break;
+        default:
+          return null;
+      }
+    }
+
+    return toISODateString(end);
+  };

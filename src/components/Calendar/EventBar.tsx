@@ -112,7 +112,7 @@ export function EventBar({
 
   return (
     <div
-      className="absolute cursor-pointer hover:opacity-80 transition-opacity overflow-hidden pointer-events-auto flex items-center"
+      className="absolute cursor-pointer hover:opacity-80 transition-opacity overflow-hidden pointer-events-auto flex items-center select-none"
       style={{
         backgroundColor: event.color,
         left: `${left}px`,
