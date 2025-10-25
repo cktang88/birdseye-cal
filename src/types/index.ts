@@ -11,6 +11,7 @@ export type Event = {
   endDate: string;   // ISO date string (YYYY-MM-DD)
   color: string;     // hex color (#rrggbb)
   calendarId?: string; // optional for backward compatibility
+  duration?: string; // optional duration string (e.g., "1.5y", "3m", "1d")
 }
 
 export type GridCell = {
@@ -25,6 +26,7 @@ export type EventFormData = {
   endDate: string;
   color: string;
   calendarId?: string;
+  duration?: string; // optional duration string (e.g., "1.5y", "3m", "1d")
 }
 
 export type DragState = {

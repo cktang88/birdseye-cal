@@ -32,11 +32,14 @@ export function EventModal({
     endDate: "",
     color: EVENT_COLORS[0], // Default to first color in palette
     calendarId: activeCalendarId || DEFAULT_CALENDAR_ID,
+    duration: undefined,
   });
 
   const [errors, setErrors] = useState<string[]>([]);
   const [isManualColorChange, setIsManualColorChange] = useState(false);
   const [autocompleteSuggestion, setAutocompleteSuggestion] = useState("");
+  const [useDurationMode, setUseDurationMode] = useState(true); // Default to duration mode
+  const [durationInput, setDurationInput] = useState("");
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -49,10 +52,19 @@ export function EventModal({
           endDate: existingEvent.endDate,
           color: existingEvent.color,
           calendarId: existingEvent.calendarId || DEFAULT_CALENDAR_ID,
+          duration: existingEvent.duration,
         });
         setIsManualColorChange(true); // Existing event already has a color
+        // Use duration mode if event has a stored duration, otherwise use date picker
+        if (existingEvent.duration) {
+          setUseDurationMode(true);
+          setDurationInput(existingEvent.duration);
+        } else {
+          setUseDurationMode(false);
+          setDurationInput("");
+        }
       } else if (initialData) {
-        // Creating new event with initial data
+        // Creating new event with initial data - use duration mode
         setFormData({
           name: initialData.name || "",
           startDate: initialData.startDate || toISODateString(new Date()),
@@ -63,8 +75,11 @@ export function EventModal({
           color: initialData.color || EVENT_COLORS[0],
           calendarId:
             initialData.calendarId || activeCalendarId || DEFAULT_CALENDAR_ID,
+          duration: initialData.duration,
         });
         setIsManualColorChange(false); // New event, allow auto color matching
+        setUseDurationMode(true); // Default to duration mode for new events
+        setDurationInput(initialData.duration || "1d"); // Default to 1 day
       }
       setErrors([]);
       setAutocompleteSuggestion("");
@@ -129,6 +144,100 @@ export function EventModal({
     }
   }, [formData.name, formData.calendarId, isOpen, events]);
 
+  // Parse duration string (e.g., "1.5y", "3m", "1d") and calculate end date
+  const parseDurationAndCalculateEndDate = (
+    startDate: string,
+    duration: string
+  ): string | null => {
+    if (!startDate || !duration) return null;
+
+    const match = duration.trim().match(/^(\d+\.?\d*)\s*([ymwdh])$/i);
+    if (!match) return null;
+
+    const value = parseFloat(match[1]);
+    const unit = match[2].toLowerCase();
+
+    const start = new Date(startDate);
+    let end = new Date(start);
+
+    // For fractional values, convert to days for accurate calculation
+    const hasFraction = value % 1 !== 0;
+
+    if (hasFraction) {
+      let daysToAdd = 0;
+      switch (unit) {
+        case "y": // years (approximate: 365.25 days per year)
+          daysToAdd = value * 365.25;
+          break;
+        case "m": // months (approximate: 30.44 days per month)
+          daysToAdd = value * 30.44;
+          break;
+        case "w": // weeks
+          daysToAdd = value * 7;
+          break;
+        case "d": // days
+          daysToAdd = value;
+          break;
+        case "h": // hours
+          end = new Date(start.getTime() + value * 60 * 60 * 1000);
+          return toISODateString(end);
+        default:
+          return null;
+      }
+      // Add days using milliseconds for precision
+      end = new Date(
+        start.getTime() + Math.round(daysToAdd * 24 * 60 * 60 * 1000)
+      );
+    } else {
+      // For whole numbers, use the built-in methods for more accurate month/year handling
+      switch (unit) {
+        case "y": // years
+          end.setFullYear(end.getFullYear() + value);
+          break;
+        case "m": // months
+          end.setMonth(end.getMonth() + value);
+          break;
+        case "w": // weeks
+          end.setDate(end.getDate() + value * 7);
+          break;
+        case "d": // days
+          end.setDate(end.getDate() + value);
+          break;
+        case "h": // hours
+          end.setHours(end.getHours() + value);
+          break;
+        default:
+          return null;
+      }
+    }
+
+    return toISODateString(end);
+  };
+
+  // Auto-calculate end date when in duration mode and store duration in formData
+  useEffect(() => {
+    if (useDurationMode && durationInput && formData.startDate) {
+      const calculatedEndDate = parseDurationAndCalculateEndDate(
+        formData.startDate,
+        durationInput
+      );
+      if (calculatedEndDate) {
+        setFormData((prev) => ({
+          ...prev,
+          endDate: calculatedEndDate,
+          duration: durationInput, // Store the duration string
+        }));
+      }
+    }
+  }, [durationInput, formData.startDate, useDurationMode]);
+
+  // When switching from duration to date picker mode, clear the stored duration
+  useEffect(() => {
+    if (!useDurationMode) {
+      setFormData((prev) => ({ ...prev, duration: undefined }));
+    }
+  }, [useDurationMode]);
+
   const validate = (): boolean => {
     const newErrors: string[] = [];
 
@@ -138,6 +247,18 @@ export function EventModal({
 
     if (!formData.startDate) {
       newErrors.push("Start date is required");
+    }
+
+    if (useDurationMode) {
+      if (!durationInput.trim()) {
+        newErrors.push("Duration is required");
+      } else if (
+        !parseDurationAndCalculateEndDate(formData.startDate, durationInput)
+      ) {
+        newErrors.push(
+          "Invalid duration format. Use format like '1.5y', '3m', '1d'"
+        );
+      }
     }
 
     if (!formData.endDate) {
@@ -247,17 +368,38 @@ export function EventModal({
             />
           </div>
 
-          {/* End Date */}
+          {/* End Date or Duration */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              End Date
-            </label>
-            <input
-              type="date"
-              value={formData.endDate}
-              onChange={(e) => handleEndDateChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">
+                {useDurationMode ? "Duration" : "End Date"}
+              </label>
+              <button
+                type="button"
+                onClick={() => setUseDurationMode(!useDurationMode)}
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                {useDurationMode
+                  ? "Switch to date picker"
+                  : "Switch to duration"}
+              </button>
+            </div>
+            {useDurationMode ? (
+              <input
+                type="text"
+                value={durationInput}
+                onChange={(e) => setDurationInput(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., 1.5y, 3m, 1w, 1d"
+              />
+            ) : (
+              <input
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => handleEndDateChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            )}
           </div>
 
           {/* Calendar Selection */}
