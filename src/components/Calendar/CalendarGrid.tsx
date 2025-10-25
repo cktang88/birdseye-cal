@@ -42,10 +42,9 @@ export function CalendarGrid({
 
   const years = Array.from(cellsByYear.keys()).sort((a, b) => a - b);
 
-  const handleCellClick = (cell: GridCellType) => {
-    if (!dragState.isDragging) {
-      onCreateEvent(cell);
-    }
+  const handleCellClick = () => {
+    // Don't create modal on click - let mouse up handle it
+    // This prevents duplicate modal creation
   };
 
   const handleCellMouseDown = (cell: GridCellType) => {
@@ -65,11 +64,30 @@ export function CalendarGrid({
     }
   };
 
-  const handleCellMouseUp = () => {
-    if (dragState.isDragging && dragState.startCell && dragState.endCell) {
-      // Determine which cell is actually the start and end (in case user dragged backwards)
+  const handleCellMouseUp = (cell?: GridCellType) => {
+    if (dragState.isDragging && dragState.startCell) {
+      // This was a drag operation
       const start = dragState.startCell;
-      const end = dragState.endCell;
+      const end = dragState.endCell || cell || start;
+
+      onCreateEvent(start, end);
+
+      setDragState({
+        isDragging: false,
+        startCell: null,
+        endCell: null,
+      });
+    } else if (cell && !dragState.isDragging) {
+      // This was a single click (no drag started)
+      onCreateEvent(cell);
+    }
+  };
+
+  const handleContainerMouseUp = () => {
+    // Handle mouse up on container (end drag if dragging)
+    if (dragState.isDragging && dragState.startCell) {
+      const start = dragState.startCell;
+      const end = dragState.endCell || start;
 
       onCreateEvent(start, end);
 
@@ -109,8 +127,8 @@ export function CalendarGrid({
   return (
     <div
       className="overflow-auto p-4"
-      onMouseUp={handleCellMouseUp}
-      onMouseLeave={handleCellMouseUp}
+      onMouseUp={handleContainerMouseUp}
+      onMouseLeave={handleContainerMouseUp}
     >
       <div className="inline-block">
         {/* Header: Week numbers */}

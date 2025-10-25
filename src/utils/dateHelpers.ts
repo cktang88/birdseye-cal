@@ -26,8 +26,8 @@ export function generateGridCells(startYear: number, endYear: number): GridCell[
       { weekStartsOn: 1 } // Monday
     );
 
-    weeks.forEach((weekStart) => {
-      const weekNumber = getWeek(weekStart, { weekStartsOn: 1 });
+    weeks.forEach((weekStart, index) => {
+      const weekNumber = index + 1; // Sequential week number (1, 2, 3, etc.)
       cells.push({
         year,
         week: weekNumber,
@@ -57,9 +57,33 @@ export function fromISODateString(dateString: string): Date {
  * Get grid position for a given date
  */
 export function getGridPosition(date: Date): { year: number; week: number } {
+  const year = getYear(date);
+  
+  // Find which week this date falls into using the same logic as generateGridCells
+  const yearStart = startOfYear(new Date(year, 0, 1));
+  const yearEnd = endOfYear(new Date(year, 0, 1));
+  
+  const weeks = eachWeekOfInterval(
+    { start: yearStart, end: yearEnd },
+    { weekStartsOn: 1 }
+  );
+  
+  // Find which week this date falls into
+  for (let i = 0; i < weeks.length; i++) {
+    const weekStart = weeks[i];
+    const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000); // Add 6 days
+    if (date >= weekStart && date <= weekEnd) {
+      return {
+        year,
+        week: i + 1 // Sequential week number
+      };
+    }
+  }
+  
+  // Fallback to first week
   return {
-    year: getYear(date),
-    week: getWeek(date, { weekStartsOn: 1 })
+    year,
+    week: 1
   };
 }
 
@@ -67,10 +91,8 @@ export function getGridPosition(date: Date): { year: number; week: number } {
  * Calculate if a date falls within a specific year-week cell
  */
 export function isDateInCell(date: Date, cell: GridCell): boolean {
-  const dateYear = getYear(date);
-  const dateWeek = getWeek(date, { weekStartsOn: 1 });
-
-  return dateYear === cell.year && dateWeek === cell.week;
+  const datePos = getGridPosition(date);
+  return datePos.year === cell.year && datePos.week === cell.week;
 }
 
 /**

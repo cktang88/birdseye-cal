@@ -21,8 +21,8 @@ export function GridCell({
     <div
       className={`
         w-full h-full
-        border border-gray-200
-        hover:bg-blue-50
+        border border-gray-300
+        hover:bg-blue-100
         cursor-pointer
         transition-colors
         ${isInDragSelection ? "bg-blue-100" : "bg-white"}

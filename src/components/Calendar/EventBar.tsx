@@ -36,12 +36,12 @@ export function EventBar({
 
   return (
     <div
-      className="absolute h-3 rounded cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+      className="absolute h-10 rounded cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
       style={{
         backgroundColor: event.color,
         left: `${left}px`,
         width: `${width}px`,
-        top: 0,
+        top: "20px", // Offset from top to center in the cell
       }}
       onClick={(e) => {
         e.stopPropagation();
