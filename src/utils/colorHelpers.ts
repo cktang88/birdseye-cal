@@ -108,7 +108,7 @@ export function getDarkerTextColor(hexColor: string): string {
   
   // Darken significantly for text readability
   // Reduce lightness to 25-35% range
-  const darkerL = Math.min(hsl.l * 0.4, 35);
+  const darkerL = Math.min(hsl.l * 0.3, 30);
   
   // Increase saturation slightly for more vibrant text
   const darkerS = Math.min(hsl.s * 1.1, 100);
