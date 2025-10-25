@@ -12,7 +12,7 @@ interface UserSettings {
 
 interface UserStore extends UserSettings {
   setBirthday: (birthday: string | null) => void;
-  addCalendar: (calendar: Omit<Calendar, "id">) => void;
+  addCalendar: (calendar: Omit<Calendar, "id">) => string; // returns new calendar id
   updateCalendar: (id: string, updates: Partial<Omit<Calendar, "id">>) => void;
   deleteCalendar: (id: string) => void;
   cloneCalendar: (id: string) => string | null; // returns new calendar id or null if not found
@@ -44,6 +44,7 @@ export const useUserStore = create<UserStore>()(
         set((state) => ({
           calendars: [...state.calendars, newCalendar],
         }));
+        return newCalendar.id;
       },
 
       updateCalendar: (id, updates) => {

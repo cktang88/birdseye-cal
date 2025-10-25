@@ -181,14 +181,24 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           return;
         }
 
-        // Create new calendar
-        const newCalendarId = crypto.randomUUID();
-        addCalendar({
-          name: importData.calendar.name || "Imported Calendar",
+        // Handle name conflicts by appending numbers
+        const calendarName = importData.calendar.name || "Imported Calendar";
+        const existingNames = calendars.map((cal) => cal.name);
+        let counter = 1;
+        let uniqueName = calendarName;
+
+        while (existingNames.includes(uniqueName)) {
+          uniqueName = `${calendarName}${counter}`;
+          counter++;
+        }
+
+        // Create new calendar and get the actual ID
+        const newCalendarId = addCalendar({
+          name: uniqueName,
           color: importData.calendar.color || EVENT_COLORS[0],
         });
 
-        // Import events
+        // Import events with the correct calendar ID
         importData.events.forEach(
           (event: {
             name: string;
@@ -206,7 +216,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           }
         );
 
-        alert(`Calendar "${importData.calendar.name}" imported successfully!`);
+        alert(`Calendar "${uniqueName}" imported successfully!`);
       } catch (error) {
         alert("Error importing calendar: " + (error as Error).message);
       }
