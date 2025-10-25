@@ -30,8 +30,13 @@ function App() {
   const { calendars, activeCalendarId, setActiveCalendar } = useUserStore();
 
   const handleCreateEvent = (startCell: GridCell, endCell?: GridCell) => {
-    const startDate = toISODateString(startCell.date);
-    const endDate = endCell ? toISODateString(endCell.date) : startDate;
+    let startDate = toISODateString(startCell.date);
+    let endDate = endCell ? toISODateString(endCell.date) : startDate;
+
+    // Swap dates if user dragged backwards
+    if (endDate < startDate) {
+      [startDate, endDate] = [endDate, startDate];
+    }
 
     setModalState({
       isOpen: true,

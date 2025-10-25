@@ -3,6 +3,7 @@ import type { Event, EventFormData } from "../../types";
 import { toISODateString } from "../../utils/dateHelpers";
 import { EVENT_COLORS } from "../../constants/grid";
 import { useUserStore, DEFAULT_CALENDAR_ID } from "../../store/userStore";
+import { useEventStore } from "../../store/eventStore";
 import { Dropdown } from "../ui/Dropdown";
 
 interface EventModalProps {
@@ -23,6 +24,7 @@ export function EventModal({
   existingEvent,
 }: EventModalProps) {
   const { calendars, activeCalendarId } = useUserStore();
+  const { events } = useEventStore();
 
   const [formData, setFormData] = useState<EventFormData>({
     name: "",
@@ -33,6 +35,7 @@ export function EventModal({
   });
 
   const [errors, setErrors] = useState<string[]>([]);
+  const [isManualColorChange, setIsManualColorChange] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -45,6 +48,7 @@ export function EventModal({
           color: existingEvent.color,
           calendarId: existingEvent.calendarId || DEFAULT_CALENDAR_ID,
         });
+        setIsManualColorChange(true); // Existing event already has a color
       } else if (initialData) {
         // Creating new event with initial data
         setFormData({
@@ -58,10 +62,33 @@ export function EventModal({
           calendarId:
             initialData.calendarId || activeCalendarId || DEFAULT_CALENDAR_ID,
         });
+        setIsManualColorChange(false); // New event, allow auto color matching
       }
       setErrors([]);
     }
   }, [isOpen, initialData, existingEvent, activeCalendarId]);
+
+  // Auto-match color based on event name (only for new events)
+  useEffect(() => {
+    if (
+      !isOpen ||
+      existingEvent ||
+      isManualColorChange ||
+      !formData.name.trim()
+    ) {
+      return;
+    }
+
+    // Find existing event with the same name (case-insensitive)
+    const matchingEvent = events.find(
+      (event) =>
+        event.name.trim().toLowerCase() === formData.name.trim().toLowerCase()
+    );
+
+    if (matchingEvent) {
+      setFormData((prev) => ({ ...prev, color: matchingEvent.color }));
+    }
+  }, [formData.name, isOpen, existingEvent, isManualColorChange, events]);
 
   const validate = (): boolean => {
     const newErrors: string[] = [];
@@ -191,7 +218,10 @@ export function EventModal({
                 <button
                   key={color}
                   type="button"
-                  onClick={() => setFormData({ ...formData, color })}
+                  onClick={() => {
+                    setFormData({ ...formData, color });
+                    setIsManualColorChange(true);
+                  }}
                   className={`w-10 h-10 rounded-md transition-all ${
                     formData.color === color
                       ? "ring-2 ring-offset-2 ring-gray-800 scale-110"
