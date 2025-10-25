@@ -148,11 +148,11 @@ export function CalendarGrid({
           <div className="w-16 shrink-0" /> {/* Year label space */}
           <div
             className="relative block h-4"
-            style={{ width: `${maxWeeks * 52}px` }}
+            style={{ width: `${maxWeeks * 28}px` }}
           >
             {monthBoundaries.map((boundary) => {
               // Convert days to week position: dayPosition / 7 * (CELL_WIDTH_PX + CELL_GAP_PX)
-              const leftPosition = (boundary.dayPosition / 7) * 52;
+              const leftPosition = (boundary.dayPosition / 7) * 28;
               return (
                 <div
                   key={boundary.month}
@@ -196,11 +196,11 @@ export function CalendarGrid({
                   if (boundary.dayPosition === 0) return null; // Don't show line at the very start
                   // Convert days to pixel position: dayPosition / 7 * (CELL_WIDTH_PX + CELL_GAP_PX)
                   // Subtract CELL_GAP_PX/2 to account for the gap
-                  const leftPosition = (boundary.dayPosition / 7) * 52 - 2;
+                  const leftPosition = (boundary.dayPosition / 7) * 28 - 2;
                   return (
                     <div
                       key={`${year}-${boundary.month}`}
-                      className="absolute top-0 bottom-0 w-0.5 bg-gray-800 pointer-events-none"
+                      className="absolute top-0 bottom-0 w-0.25 bg-gray-800 pointer-events-none"
                       style={{ left: `${leftPosition}px` }}
                     />
                   );
