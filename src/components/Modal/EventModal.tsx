@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Event, EventFormData } from "../../types";
 import { toISODateString } from "../../utils/dateHelpers";
 import { EVENT_COLORS } from "../../constants/grid";
@@ -36,9 +36,17 @@ export function EventModal({
 
   const [errors, setErrors] = useState<string[]>([]);
   const [isManualColorChange, setIsManualColorChange] = useState(false);
+  const [isManualEndDateChange, setIsManualEndDateChange] = useState(false);
+  const [autocompleteSuggestion, setAutocompleteSuggestion] = useState("");
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const previousStartDateRef = useRef<string>("");
+  const isInitialMountRef = useRef<boolean>(true);
 
   useEffect(() => {
     if (isOpen) {
+      // Mark as initial mount to prevent auto-adjust from running
+      isInitialMountRef.current = true;
+
       if (existingEvent) {
         // Editing existing event
         setFormData({
@@ -49,11 +57,14 @@ export function EventModal({
           calendarId: existingEvent.calendarId || DEFAULT_CALENDAR_ID,
         });
         setIsManualColorChange(true); // Existing event already has a color
+        setIsManualEndDateChange(true); // Existing event already has an end date
+        previousStartDateRef.current = existingEvent.startDate;
       } else if (initialData) {
         // Creating new event with initial data
+        const startDate = initialData.startDate || toISODateString(new Date());
         setFormData({
           name: initialData.name || "",
-          startDate: initialData.startDate || toISODateString(new Date()),
+          startDate,
           endDate:
             initialData.endDate ||
             initialData.startDate ||
@@ -63,12 +74,24 @@ export function EventModal({
             initialData.calendarId || activeCalendarId || DEFAULT_CALENDAR_ID,
         });
         setIsManualColorChange(false); // New event, allow auto color matching
+        setIsManualEndDateChange(false); // New event, allow auto end date adjustment
+        previousStartDateRef.current = startDate;
       }
       setErrors([]);
+      setAutocompleteSuggestion("");
+
+      // Allow auto-adjust to work after initial setup
+      setTimeout(() => {
+        isInitialMountRef.current = false;
+      }, 0);
+    } else {
+      // Reset when modal closes to prevent stale data
+      previousStartDateRef.current = "";
+      isInitialMountRef.current = true;
     }
   }, [isOpen, initialData, existingEvent, activeCalendarId]);
 
-  // Auto-match color based on event name (only for new events)
+  // Auto-match color based on event name (only for new events in the same calendar)
   useEffect(() => {
     if (
       !isOpen ||
@@ -79,16 +102,90 @@ export function EventModal({
       return;
     }
 
-    // Find existing event with the same name (case-insensitive)
+    // Find existing event with the same name in the same calendar (case-insensitive)
     const matchingEvent = events.find(
       (event) =>
+        event.calendarId === formData.calendarId &&
         event.name.trim().toLowerCase() === formData.name.trim().toLowerCase()
     );
 
     if (matchingEvent) {
       setFormData((prev) => ({ ...prev, color: matchingEvent.color }));
     }
-  }, [formData.name, isOpen, existingEvent, isManualColorChange, events]);
+  }, [
+    formData.name,
+    formData.calendarId,
+    isOpen,
+    existingEvent,
+    isManualColorChange,
+    events,
+  ]);
+
+  // Auto-adjust end date when start date changes (maintain duration)
+  useEffect(() => {
+    // Early exit conditions - don't update ref in these cases
+    if (!isOpen || isManualEndDateChange || isInitialMountRef.current) {
+      return;
+    }
+
+    if (!formData.startDate || !formData.endDate) {
+      return;
+    }
+
+    // Skip if this is the initial load (no previous start date tracked)
+    if (!previousStartDateRef.current) {
+      previousStartDateRef.current = formData.startDate;
+      return;
+    }
+
+    // Skip if start date hasn't actually changed
+    if (previousStartDateRef.current === formData.startDate) {
+      return;
+    }
+
+    // Calculate the duration (in days) between start and end
+    const prevStart = new Date(previousStartDateRef.current);
+    const currentStart = new Date(formData.startDate);
+    const currentEnd = new Date(formData.endDate);
+
+    // Calculate how many days the start date changed
+    const startDiff = currentStart.getTime() - prevStart.getTime();
+
+    // Adjust the end date by the same amount
+    const newEnd = new Date(currentEnd.getTime() + startDiff);
+    const newEndDateString = toISODateString(newEnd);
+
+    setFormData((prev) => ({ ...prev, endDate: newEndDateString }));
+    previousStartDateRef.current = formData.startDate;
+  }, [formData.startDate, formData.endDate, isOpen, isManualEndDateChange]);
+
+  // Autocomplete for event name (only from the same calendar)
+  useEffect(() => {
+    if (!isOpen || !formData.name) {
+      setAutocompleteSuggestion("");
+      return;
+    }
+
+    // Get unique event names from existing events in the same calendar
+    const calendarEvents = events.filter(
+      (e) => e.calendarId === formData.calendarId
+    );
+    const uniqueNames = Array.from(new Set(calendarEvents.map((e) => e.name)));
+
+    // Find the first match that starts with the current input (case-insensitive)
+    const lowerInput = formData.name.toLowerCase();
+    const match = uniqueNames.find(
+      (name) =>
+        name.toLowerCase().startsWith(lowerInput) &&
+        name.toLowerCase() !== lowerInput
+    );
+
+    if (match) {
+      setAutocompleteSuggestion(match);
+    } else {
+      setAutocompleteSuggestion("");
+    }
+  }, [formData.name, formData.calendarId, isOpen, events]);
 
   const validate = (): boolean => {
     const newErrors: string[] = [];
@@ -133,6 +230,29 @@ export function EventModal({
     }
   };
 
+  const handleNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Tab" && autocompleteSuggestion) {
+      e.preventDefault();
+      setFormData((prev) => ({ ...prev, name: autocompleteSuggestion }));
+      setAutocompleteSuggestion("");
+    }
+  };
+
+  const handleStartDateChange = (newStartDate: string) => {
+    setFormData((prev) => ({ ...prev, startDate: newStartDate }));
+  };
+
+  const handleEndDateChange = (newEndDate: string) => {
+    setFormData((prev) => ({ ...prev, endDate: newEndDate }));
+    setIsManualEndDateChange(true); // User manually changed end date
+  };
+
+  const handleCalendarChange = (newCalendarId: string) => {
+    setFormData((prev) => ({ ...prev, calendarId: newCalendarId }));
+    // Reset autocomplete when calendar changes
+    setAutocompleteSuggestion("");
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -148,16 +268,29 @@ export function EventModal({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Event Name
             </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter event name"
-              autoFocus
-            />
+            <div className="relative">
+              {/* Autocomplete suggestion overlay */}
+              {autocompleteSuggestion && (
+                <div className="absolute inset-0 px-3 py-2 pointer-events-none flex items-center">
+                  <span className="invisible">{formData.name}</span>
+                  <span className="text-gray-400">
+                    {autocompleteSuggestion.substring(formData.name.length)}
+                  </span>
+                </div>
+              )}
+              <input
+                ref={nameInputRef}
+                type="text"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, name: e.target.value }))
+                }
+                onKeyDown={handleNameKeyDown}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 relative bg-transparent"
+                placeholder="Enter event name"
+                autoFocus
+              />
+            </div>
           </div>
 
           {/* Start Date */}
@@ -168,9 +301,7 @@ export function EventModal({
             <input
               type="date"
               value={formData.startDate}
-              onChange={(e) =>
-                setFormData({ ...formData, startDate: e.target.value })
-              }
+              onChange={(e) => handleStartDateChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -183,9 +314,7 @@ export function EventModal({
             <input
               type="date"
               value={formData.endDate}
-              onChange={(e) =>
-                setFormData({ ...formData, endDate: e.target.value })
-              }
+              onChange={(e) => handleEndDateChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -197,9 +326,7 @@ export function EventModal({
             </label>
             <Dropdown
               value={formData.calendarId || DEFAULT_CALENDAR_ID}
-              onChange={(value) =>
-                setFormData({ ...formData, calendarId: value })
-              }
+              onChange={handleCalendarChange}
               options={calendars.map((calendar) => ({
                 value: calendar.id,
                 label: calendar.name,
@@ -219,7 +346,7 @@ export function EventModal({
                   key={color}
                   type="button"
                   onClick={() => {
-                    setFormData({ ...formData, color });
+                    setFormData((prev) => ({ ...prev, color }));
                     setIsManualColorChange(true);
                   }}
                   className={`w-10 h-10 rounded-md transition-all ${
