@@ -140,10 +140,12 @@ export function CalendarGrid({
       <div className="inline-block">
         {/* Header: Week numbers */}
         <div className="flex mb-2">
+          {/* w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
           <div className="w-16 shrink-0" /> {/* Year label space */}
           {Array.from({ length: maxWeeks }, (_, i) => (
             <div
               key={i}
+              // w-12 = CELL_WIDTH_PX (48px)
               className="w-12 text-xs text-gray-400 text-center shrink-0"
             >
               {(i + 1) % 5 === 0 ? i + 1 : ""}
@@ -157,12 +159,12 @@ export function CalendarGrid({
 
           return (
             <div key={year} className="flex mb-2">
-              {/* Year label */}
+              {/* Year label - w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
               <div className="w-16 shrink-0 text-sm font-medium text-gray-700 pr-2 text-right">
                 {year}
               </div>
 
-              {/* Week cells with event bars overlay */}
+              {/* Week cells with event bars overlay - gap-1 = CELL_GAP_PX (4px) */}
               <div className="relative flex gap-1">
                 {cells.map((cell) => (
                   <GridCell

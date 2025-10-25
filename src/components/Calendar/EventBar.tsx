@@ -1,5 +1,11 @@
 import type { Event } from "../../types";
 import { getGridPosition, fromISODateString } from "../../utils/dateHelpers";
+import {
+  CELL_TOTAL_WIDTH_PX,
+  CELL_GAP_PX,
+  LANE_HEIGHT_PX,
+  LANE_TOP_OFFSET_PX,
+} from "../../constants/grid";
 
 interface EventBarProps {
   event: Event;
@@ -31,14 +37,13 @@ export function EventBar({
   const barStartWeek = startPos.year === year ? startPos.week : 1;
   const barEndWeek = endPos.year === year ? endPos.week : maxWeeks;
 
-  // Position in pixels (48px per cell + 4px gap)
-  const cellWidth = 52; // 48px width + 4px gap (w-12 + gap-1)
-  const left = (barStartWeek - 1) * cellWidth;
-  const width = (barEndWeek - barStartWeek + 1) * cellWidth - 4; // -4 to account for gap
+  // Position in pixels
+  const left = (barStartWeek - 1) * CELL_TOTAL_WIDTH_PX;
+  const width =
+    (barEndWeek - barStartWeek + 1) * CELL_TOTAL_WIDTH_PX - CELL_GAP_PX;
 
-  // Calculate vertical position based on lane (cell height is 48px, each lane is 12px)
-  const laneHeight = 10; // 25% of 48px
-  const top = lane * laneHeight + 4;
+  // Calculate vertical position based on lane
+  const top = lane * LANE_HEIGHT_PX + LANE_TOP_OFFSET_PX;
 
   return (
     <div
@@ -48,7 +53,7 @@ export function EventBar({
         left: `${left}px`,
         width: `${width}px`,
         top: `${top}px`,
-        height: `${laneHeight}px`,
+        height: `${LANE_HEIGHT_PX}px`,
       }}
       onClick={(e) => {
         e.stopPropagation();
