@@ -36,17 +36,11 @@ export function EventModal({
 
   const [errors, setErrors] = useState<string[]>([]);
   const [isManualColorChange, setIsManualColorChange] = useState(false);
-  const [isManualEndDateChange, setIsManualEndDateChange] = useState(false);
   const [autocompleteSuggestion, setAutocompleteSuggestion] = useState("");
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const previousStartDateRef = useRef<string>("");
-  const isInitialMountRef = useRef<boolean>(true);
 
   useEffect(() => {
     if (isOpen) {
-      // Mark as initial mount to prevent auto-adjust from running
-      isInitialMountRef.current = true;
-
       if (existingEvent) {
         // Editing existing event
         setFormData({
@@ -57,14 +51,11 @@ export function EventModal({
           calendarId: existingEvent.calendarId || DEFAULT_CALENDAR_ID,
         });
         setIsManualColorChange(true); // Existing event already has a color
-        setIsManualEndDateChange(true); // Existing event already has an end date
-        previousStartDateRef.current = existingEvent.startDate;
       } else if (initialData) {
         // Creating new event with initial data
-        const startDate = initialData.startDate || toISODateString(new Date());
         setFormData({
           name: initialData.name || "",
-          startDate,
+          startDate: initialData.startDate || toISODateString(new Date()),
           endDate:
             initialData.endDate ||
             initialData.startDate ||
@@ -74,20 +65,9 @@ export function EventModal({
             initialData.calendarId || activeCalendarId || DEFAULT_CALENDAR_ID,
         });
         setIsManualColorChange(false); // New event, allow auto color matching
-        setIsManualEndDateChange(false); // New event, allow auto end date adjustment
-        previousStartDateRef.current = startDate;
       }
       setErrors([]);
       setAutocompleteSuggestion("");
-
-      // Allow auto-adjust to work after initial setup
-      setTimeout(() => {
-        isInitialMountRef.current = false;
-      }, 0);
-    } else {
-      // Reset when modal closes to prevent stale data
-      previousStartDateRef.current = "";
-      isInitialMountRef.current = true;
     }
   }, [isOpen, initialData, existingEvent, activeCalendarId]);
 
@@ -120,44 +100,6 @@ export function EventModal({
     isManualColorChange,
     events,
   ]);
-
-  // Auto-adjust end date when start date changes (maintain duration)
-  useEffect(() => {
-    // Early exit conditions - don't update ref in these cases
-    if (!isOpen || isManualEndDateChange || isInitialMountRef.current) {
-      return;
-    }
-
-    if (!formData.startDate || !formData.endDate) {
-      return;
-    }
-
-    // Skip if this is the initial load (no previous start date tracked)
-    if (!previousStartDateRef.current) {
-      previousStartDateRef.current = formData.startDate;
-      return;
-    }
-
-    // Skip if start date hasn't actually changed
-    if (previousStartDateRef.current === formData.startDate) {
-      return;
-    }
-
-    // Calculate the duration (in days) between start and end
-    const prevStart = new Date(previousStartDateRef.current);
-    const currentStart = new Date(formData.startDate);
-    const currentEnd = new Date(formData.endDate);
-
-    // Calculate how many days the start date changed
-    const startDiff = currentStart.getTime() - prevStart.getTime();
-
-    // Adjust the end date by the same amount
-    const newEnd = new Date(currentEnd.getTime() + startDiff);
-    const newEndDateString = toISODateString(newEnd);
-
-    setFormData((prev) => ({ ...prev, endDate: newEndDateString }));
-    previousStartDateRef.current = formData.startDate;
-  }, [formData.startDate, formData.endDate, isOpen, isManualEndDateChange]);
 
   // Autocomplete for event name (only from the same calendar)
   useEffect(() => {
@@ -244,7 +186,6 @@ export function EventModal({
 
   const handleEndDateChange = (newEndDate: string) => {
     setFormData((prev) => ({ ...prev, endDate: newEndDate }));
-    setIsManualEndDateChange(true); // User manually changed end date
   };
 
   const handleCalendarChange = (newCalendarId: string) => {
