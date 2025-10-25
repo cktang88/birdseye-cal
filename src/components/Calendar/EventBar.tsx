@@ -73,7 +73,8 @@ export function EventBar({
     CELL_GAP_PX;
 
   // Calculate dynamic height based on number of overlapping events
-  const eventHeight = LANE_HEIGHT_PX / maxLanesUsed;
+  // Minimum of 2 lanes to ensure single events are 50% of max height
+  const eventHeight = LANE_HEIGHT_PX / Math.max(maxLanesUsed, 2);
 
   // Calculate vertical position based on lane
   const top = lane * eventHeight + LANE_TOP_OFFSET_PX;

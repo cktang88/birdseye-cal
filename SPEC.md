@@ -204,3 +204,10 @@ npm run dev
 ```
 
 Visit http://localhost:5173 to view the app.
+
+
+
+TODOS:
+- need to handle up to 6 events, year rows need more height, cells more height, cells still need more width
+- person can enter bday, will have a little number over how old they are each yr
+- ability for event to be added on specific calendar, switch calendar on dropdown
