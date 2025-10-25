@@ -15,6 +15,7 @@ interface UserStore extends UserSettings {
   addCalendar: (calendar: Omit<Calendar, "id">) => void;
   updateCalendar: (id: string, updates: Partial<Omit<Calendar, "id">>) => void;
   deleteCalendar: (id: string) => void;
+  cloneCalendar: (id: string) => string | null; // returns new calendar id or null if not found
   setActiveCalendar: (id: string) => void;
   getCalendar: (id: string) => Calendar | undefined;
 }
@@ -68,6 +69,23 @@ export const useUserStore = create<UserStore>()(
             activeCalendarId: newActiveId,
           };
         });
+      },
+
+      cloneCalendar: (id) => {
+        const sourceCalendar = get().calendars.find((cal) => cal.id === id);
+        if (!sourceCalendar) return null;
+
+        const newCalendar: Calendar = {
+          id: crypto.randomUUID(),
+          name: `${sourceCalendar.name} (copy)`,
+          color: sourceCalendar.color,
+        };
+
+        set((state) => ({
+          calendars: [...state.calendars, newCalendar],
+        }));
+
+        return newCalendar.id;
       },
 
       setActiveCalendar: (id) => {
