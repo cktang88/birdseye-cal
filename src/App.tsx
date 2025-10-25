@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { CalendarGrid } from "./components/Calendar/CalendarGrid";
 import { EventBar } from "./components/Calendar/EventBar";
 import { EventModal } from "./components/Modal/EventModal";
 import { useEventStore } from "./store/eventStore";
 import type { Event, GridCell, EventFormData } from "./types";
 import { toISODateString, randomColor } from "./utils/dateHelpers";
+import { calculateEventLanes } from "./utils/eventLayout";
 
 function App() {
   const currentYear = new Date().getFullYear();
@@ -65,6 +66,15 @@ function App() {
   // Group cells by year for event rendering
   const maxWeeks = 53;
 
+  // Calculate event lanes for each year to prevent overlapping
+  const eventLanesByYear = useMemo(() => {
+    const lanesByYear = new Map<number, Map<string, number>>();
+    for (let year = yearRange.start; year <= yearRange.end; year++) {
+      lanesByYear.set(year, calculateEventLanes(events, year));
+    }
+    return lanesByYear;
+  }, [events, yearRange]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -112,15 +122,20 @@ function App() {
                     <div key={i} className="w-12 h-12" />
                   ))}
                   <div className="absolute inset-0">
-                    {events.map((event) => (
-                      <EventBar
-                        key={event.id}
-                        event={event}
-                        year={year}
-                        maxWeeks={maxWeeks}
-                        onEventClick={handleEventClick}
-                      />
-                    ))}
+                    {events.map((event) => {
+                      const lane =
+                        eventLanesByYear.get(year)?.get(event.id) ?? 0;
+                      return (
+                        <EventBar
+                          key={event.id}
+                          event={event}
+                          year={year}
+                          maxWeeks={maxWeeks}
+                          lane={lane}
+                          onEventClick={handleEventClick}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               </div>
