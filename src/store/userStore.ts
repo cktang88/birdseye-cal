@@ -18,6 +18,7 @@ interface UserStore extends UserSettings {
   cloneCalendar: (id: string) => string | null; // returns new calendar id or null if not found
   setActiveCalendar: (id: string) => void;
   getCalendar: (id: string) => Calendar | undefined;
+  importCalendar: (calendarId: string | null) => void;
 }
 
 export const useUserStore = create<UserStore>()(
@@ -94,6 +95,14 @@ export const useUserStore = create<UserStore>()(
 
       getCalendar: (id) => {
         return get().calendars.find((cal) => cal.id === id);
+      },
+
+      importCalendar: (calendarId) => {
+        // This will be called after events are imported
+        // The actual file reading happens in the component
+        if (calendarId) {
+          set({ activeCalendarId: calendarId });
+        }
       },
     }),
     {

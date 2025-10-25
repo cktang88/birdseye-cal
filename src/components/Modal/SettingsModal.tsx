@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useUserStore, DEFAULT_CALENDAR_ID } from "../../store/userStore";
 import { useEventStore } from "../../store/eventStore";
 import { EVENT_COLORS } from "../../constants/grid";
+import { Download, Upload, Edit2, Copy, Trash2 } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     null
   );
   const [editingName, setEditingName] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -117,6 +119,105 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setEditingName("");
   };
 
+  const handleExportCalendar = (calendarId: string) => {
+    // Get the calendar
+    const calendar = calendars.find((cal) => cal.id === calendarId);
+    if (!calendar) return;
+
+    // Get all events for this calendar
+    const calendarEvents = events.filter(
+      (event) =>
+        event.calendarId === calendarId ||
+        (!event.calendarId && calendarId === DEFAULT_CALENDAR_ID)
+    );
+
+    // Create export data
+    const exportData = {
+      calendar: {
+        name: calendar.name,
+        color: calendar.color,
+      },
+      events: calendarEvents.map((event) => ({
+        name: event.name,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        color: event.color,
+      })),
+      exportDate: new Date().toISOString(),
+      version: "1.0",
+    };
+
+    // Create blob and download
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${calendar.name.replace(/[^a-z0-9]/gi, "_")}_calendar.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportCalendar = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importData = JSON.parse(e.target?.result as string);
+
+        // Validate import data
+        if (
+          !importData.calendar ||
+          !importData.events ||
+          !Array.isArray(importData.events)
+        ) {
+          alert("Invalid calendar file format");
+          return;
+        }
+
+        // Create new calendar
+        const newCalendarId = crypto.randomUUID();
+        addCalendar({
+          name: importData.calendar.name || "Imported Calendar",
+          color: importData.calendar.color || EVENT_COLORS[0],
+        });
+
+        // Import events
+        importData.events.forEach(
+          (event: {
+            name: string;
+            startDate: string;
+            endDate: string;
+            color: string;
+          }) => {
+            addEvent({
+              name: event.name,
+              startDate: event.startDate,
+              endDate: event.endDate,
+              color: event.color,
+              calendarId: newCalendarId,
+            });
+          }
+        );
+
+        alert(`Calendar "${importData.calendar.name}" imported successfully!`);
+      } catch (error) {
+        alert("Error importing calendar: " + (error as Error).message);
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset the input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -183,7 +284,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       </>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     {editingCalendarId === calendar.id ? (
                       <>
                         <button
@@ -208,26 +309,35 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                           onClick={() =>
                             handleStartRename(calendar.id, calendar.name)
                           }
-                          className="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-colors text-sm"
+                          className="text-blue-600 hover:bg-blue-100 p-2 rounded transition-colors"
                           title="Rename calendar"
                         >
-                          Rename
+                          <Edit2 size={16} />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleCloneCalendar(calendar.id)}
-                          className="text-purple-600 hover:bg-purple-50 px-2 py-1 rounded transition-colors text-sm"
+                          className="text-purple-600 hover:bg-purple-100 p-2 rounded transition-colors"
                           title="Clone calendar and all its events"
                         >
-                          Clone
+                          <Copy size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleExportCalendar(calendar.id)}
+                          className="text-green-600 hover:bg-green-100 p-2 rounded transition-colors"
+                          title="Export calendar"
+                        >
+                          <Download size={16} />
                         </button>
                         {calendar.id !== DEFAULT_CALENDAR_ID && (
                           <button
                             type="button"
                             onClick={() => handleDeleteCalendar(calendar.id)}
-                            className="text-red-600 hover:bg-red-50 px-2 py-1 rounded transition-colors text-sm"
+                            className="text-red-600 hover:bg-red-100 p-2 rounded transition-colors"
+                            title="Delete calendar"
                           >
-                            Delete
+                            <Trash2 size={16} />
                           </button>
                         )}
                       </>
@@ -239,9 +349,27 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
             {/* Add New Calendar Form */}
             <div className="border border-gray-300 rounded-md p-4 bg-gray-50">
-              <h4 className="text-sm font-medium text-gray-700 mb-3">
-                Add New Calendar
-              </h4>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-medium text-gray-700">
+                  Add New Calendar
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1 text-blue-600 hover:bg-blue-50 px-3 py-1 rounded transition-colors text-sm"
+                  title="Import calendar from file"
+                >
+                  <Upload size={16} />
+                  Import
+                </button>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleImportCalendar}
+                className="hidden"
+              />
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">
