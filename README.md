@@ -2,6 +2,8 @@
 
 A frontend-only React application for visualizing long-running events across months and years. Events are displayed as horizontal bars on a grid where the x-axis represents weeks/months and the y-axis represents years.
 
+![pic.jpeg](pic.jpeg)
+
 ## Tech Stack
 
 - React + Vite + TypeScript
