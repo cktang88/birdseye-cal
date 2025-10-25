@@ -192,14 +192,6 @@ birdseye-cal/
 - LocalStorage persistence
 - Basic styling with Tailwind
 
-**Exclude (future enhancements):**
-- Event categories/tags
-- Filtering/search
-- Export/import
-- Recurring events
-- Mobile drag interaction optimization
-- Undo/redo
-- Multiple calendar views
 
 ## Current Status
 - [x] Spec created
@@ -226,6 +218,3 @@ npm run dev
 ```
 
 Visit http://localhost:5173 to view the app.
-
-TODOS:
-- ability for event to be added on specific calendar, switch calendar on dropdown
