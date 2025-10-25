@@ -88,12 +88,26 @@ type Event = {
 - Auto-save on create/update/delete
 - Load from LocalStorage on app mount
 
-### 6. UI Components
+### 6. User Settings & Birthday Feature
+
+#### Settings Modal
+- Accessible via gear icon in header
+- Allows user to enter their birthday (including year)
+- Birthday stored in LocalStorage
+
+#### Age Indicator
+- Small badge appears on birth month cells
+- Shows age turning that year
+- Purple badge in top-right corner of cell
+- Only displays in the month of birth
+
+### 7. UI Components
 
 #### CalendarGrid
 - Renders year rows and month columns
 - Handles click and drag interactions
 - Displays all event bars
+- Displays age indicators on birth month cells
 
 #### EventBar
 - Visual representation of one event (or one segment if multi-year)
@@ -103,6 +117,10 @@ type Event = {
 #### EventModal
 - Form for creating/editing events
 - Native HTML inputs (keep simple)
+
+#### SettingsModal
+- Form for entering birthday
+- Persists to LocalStorage
 
 #### CalendarControls (optional, for future)
 - Year range selector
@@ -128,9 +146,11 @@ birdseye-cal/
     │   │   ├── EventBar.tsx
     │   │   └── GridCell.tsx
     │   └── Modal/
-    │       └── EventModal.tsx
+    │       ├── EventModal.tsx
+    │       └── SettingsModal.tsx
     ├── store/
-    │   └── eventStore.ts
+    │   ├── eventStore.ts
+    │   └── userStore.ts
     ├── types/
     │   └── index.ts
     └── utils/
@@ -196,6 +216,8 @@ birdseye-cal/
 - [x] Edit/delete functionality
 - [x] Basic styling complete
 - [x] MVP complete and running
+- [x] Settings modal with birthday input
+- [x] Age indicator on birth month cells
 
 ## Running the App
 ```bash
@@ -205,16 +227,5 @@ npm run dev
 
 Visit http://localhost:5173 to view the app.
 
-
-
-## Recent Updates
-- [x] Updated to support up to 6 overlapping events per year (previously 4)
-- [x] Doubled cell width from 64px to 128px for better visibility
-- [x] Optimized cell height to 100px for balanced event visibility
-- [x] Adjusted lane height to 84px to accommodate up to 6 events
-- [x] Added more spacing between year rows (mb-4 instead of mb-2)
-- [x] Year rows now have optimal vertical space for event display
-
 TODOS:
-- person can enter bday, will have a little number over how old they are each yr
 - ability for event to be added on specific calendar, switch calendar on dropdown

@@ -143,3 +143,31 @@ export function getMonthFractionEnd(date: Date): number {
   // Don't subtract 1, so the end of day 1 = 1/31, end of day 31 = 31/31 = 1.0
   return day / totalDays;
 }
+
+/**
+ * Calculate age at a specific month/year given a birthday
+ * Returns the age they turn in that month of that year, or null if birthday not set
+ * or if the month hasn't reached their birthday month yet in that year
+ */
+export function calculateAgeAtCell(
+  birthday: string | null,
+  year: number,
+  month: number
+): number | null {
+  if (!birthday) return null;
+
+  const birthDate = parseISO(birthday);
+  const birthYear = getYear(birthDate);
+  const birthMonth = getMonth(birthDate) + 1; // getMonth returns 0-11, we want 1-12
+
+  // Only show age in the birth month
+  if (month !== birthMonth) return null;
+
+  // Calculate age: the age they turn in this year
+  const age = year - birthYear;
+
+  // Don't show age for years before they were born
+  if (age < 0) return null;
+
+  return age;
+}

@@ -4,6 +4,7 @@ import { generateGridCells, getMonthNames } from "../../utils/dateHelpers";
 import { GridCell } from "./GridCell";
 import { EventBar } from "./EventBar";
 import type { EventLayoutInfo } from "../../utils/eventLayout";
+import { useUserStore } from "../../store/userStore";
 
 interface CalendarGridProps {
   startYear: number;
@@ -22,6 +23,8 @@ export function CalendarGrid({
   onCreateEvent,
   onEventClick,
 }: CalendarGridProps) {
+  const { birthday } = useUserStore();
+
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     startCell: null,
@@ -175,6 +178,7 @@ export function CalendarGrid({
                   <GridCell
                     key={`${cell.year}-${cell.month}`}
                     cell={cell}
+                    birthday={birthday}
                     onCellClick={handleCellClick}
                     onCellMouseDown={handleCellMouseDown}
                     onCellMouseEnter={handleCellMouseEnter}
