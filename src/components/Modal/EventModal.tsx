@@ -3,6 +3,7 @@ import type { Event, EventFormData } from "../../types";
 import { toISODateString } from "../../utils/dateHelpers";
 import { EVENT_COLORS } from "../../constants/grid";
 import { useUserStore, DEFAULT_CALENDAR_ID } from "../../store/userStore";
+import { Dropdown } from "../ui/Dropdown";
 
 interface EventModalProps {
   isOpen: boolean;
@@ -167,19 +168,17 @@ export function EventModal({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Calendar
             </label>
-            <select
+            <Dropdown
               value={formData.calendarId || DEFAULT_CALENDAR_ID}
-              onChange={(e) =>
-                setFormData({ ...formData, calendarId: e.target.value })
+              onChange={(value) =>
+                setFormData({ ...formData, calendarId: value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {calendars.map((calendar) => (
-                <option key={calendar.id} value={calendar.id}>
-                  {calendar.name}
-                </option>
-              ))}
-            </select>
+              options={calendars.map((calendar) => ({
+                value: calendar.id,
+                label: calendar.name,
+              }))}
+              className="w-full"
+            />
           </div>
 
           {/* Color */}

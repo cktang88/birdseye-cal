@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { CalendarGrid } from "./components/Calendar/CalendarGrid";
 import { EventModal } from "./components/Modal/EventModal";
 import { SettingsModal } from "./components/Modal/SettingsModal";
+import { Dropdown } from "./components/ui/Dropdown";
 import { useEventStore } from "./store/eventStore";
 import { useUserStore, DEFAULT_CALENDAR_ID } from "./store/userStore";
 import type { Event, GridCell, EventFormData } from "./types";
@@ -100,17 +101,15 @@ function App() {
           </div>
           <div className="flex items-center gap-2">
             {/* Calendar Switcher */}
-            <select
+            <Dropdown
               value={activeCalendarId}
-              onChange={(e) => setActiveCalendar(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            >
-              {calendars.map((calendar) => (
-                <option key={calendar.id} value={calendar.id}>
-                  {calendar.name}
-                </option>
-              ))}
-            </select>
+              onChange={setActiveCalendar}
+              options={calendars.map((calendar) => ({
+                value: calendar.id,
+                label: calendar.name,
+              }))}
+              className="min-w-[200px]"
+            />
 
             {/* Settings Button */}
             <button
