@@ -1,15 +1,22 @@
 import type { Event } from "../types";
 import { fromISODateString, getGridPosition } from "./dateHelpers";
 
+export type EventLayoutInfo = {
+  laneMap: Map<string, number>;
+  maxLanesUsed: number; // Maximum number of overlapping events (1-4)
+};
+
 /**
  * Determines the lane (vertical position) for each event within a year
- * to prevent overlapping. Returns a map of event ID to lane number (0-3).
+ * to prevent overlapping. Returns a map of event ID to lane number (0-3)
+ * and the maximum number of lanes used for dynamic height calculation.
  */
 export function calculateEventLanes(
   events: Event[],
   year: number
-): Map<string, number> {
+): EventLayoutInfo {
   const laneMap = new Map<string, number>();
+  let maxLanesUsed = 0;
 
   // Filter events that appear in this year and sort by start position
   const yearEvents = events
@@ -64,8 +71,9 @@ export function calculateEventLanes(
     }
 
     laneMap.set(event.id, assignedLane);
+    maxLanesUsed = Math.max(maxLanesUsed, assignedLane + 1);
   }
 
-  return laneMap;
+  return { laneMap, maxLanesUsed: maxLanesUsed || 1 };
 }
 

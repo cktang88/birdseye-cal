@@ -10,7 +10,7 @@ function App() {
   const currentYear = new Date().getFullYear();
   const [yearRange] = useState({
     start: currentYear - 2,
-    end: currentYear + 3,
+    end: currentYear + 15,
   });
 
   const [modalState, setModalState] = useState<{
@@ -63,12 +63,12 @@ function App() {
   };
 
   // Calculate event lanes for each year to prevent overlapping
-  const eventLanesByYear = useMemo(() => {
-    const lanesByYear = new Map<number, Map<string, number>>();
+  const eventLayoutByYear = useMemo(() => {
+    const layoutByYear = new Map();
     for (let year = yearRange.start; year <= yearRange.end; year++) {
-      lanesByYear.set(year, calculateEventLanes(events, year));
+      layoutByYear.set(year, calculateEventLanes(events, year));
     }
-    return lanesByYear;
+    return layoutByYear;
   }, [events, yearRange]);
 
   return (
@@ -88,7 +88,7 @@ function App() {
           startYear={yearRange.start}
           endYear={yearRange.end}
           events={events}
-          eventLanesByYear={eventLanesByYear}
+          eventLayoutByYear={eventLayoutByYear}
           onCreateEvent={handleCreateEvent}
           onEventClick={handleEventClick}
         />

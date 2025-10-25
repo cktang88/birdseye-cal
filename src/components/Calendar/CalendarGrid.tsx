@@ -3,12 +3,13 @@ import type { GridCell as GridCellType, DragState, Event } from "../../types";
 import { generateGridCells } from "../../utils/dateHelpers";
 import { GridCell } from "./GridCell";
 import { EventBar } from "./EventBar";
+import type { EventLayoutInfo } from "../../utils/eventLayout";
 
 interface CalendarGridProps {
   startYear: number;
   endYear: number;
   events: Event[];
-  eventLanesByYear: Map<number, Map<string, number>>;
+  eventLayoutByYear: Map<number, EventLayoutInfo>;
   onCreateEvent: (startCell: GridCellType, endCell?: GridCellType) => void;
   onEventClick: (event: Event) => void;
 }
@@ -17,7 +18,7 @@ export function CalendarGrid({
   startYear,
   endYear,
   events,
-  eventLanesByYear,
+  eventLayoutByYear,
   onCreateEvent,
   onEventClick,
 }: CalendarGridProps) {
@@ -181,7 +182,9 @@ export function CalendarGrid({
                 {/* Event bars overlay for this year */}
                 <div className="absolute inset-0 pointer-events-none">
                   {events.map((event) => {
-                    const lane = eventLanesByYear.get(year)?.get(event.id) ?? 0;
+                    const layoutInfo = eventLayoutByYear.get(year);
+                    const lane = layoutInfo?.laneMap.get(event.id) ?? 0;
+                    const maxLanesUsed = layoutInfo?.maxLanesUsed ?? 1;
                     return (
                       <EventBar
                         key={event.id}
@@ -189,6 +192,7 @@ export function CalendarGrid({
                         year={year}
                         maxWeeks={maxWeeks}
                         lane={lane}
+                        maxLanesUsed={maxLanesUsed}
                         onEventClick={onEventClick}
                       />
                     );

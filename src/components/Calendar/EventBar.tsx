@@ -12,6 +12,7 @@ interface EventBarProps {
   year: number;
   maxWeeks: number;
   lane: number; // 0-3, determines vertical position
+  maxLanesUsed: number; // Number of overlapping events (1-4) for dynamic height
   onEventClick: (event: Event) => void;
 }
 
@@ -20,6 +21,7 @@ export function EventBar({
   year,
   maxWeeks,
   lane,
+  maxLanesUsed,
   onEventClick,
 }: EventBarProps) {
   const startDate = fromISODateString(event.startDate);
@@ -42,18 +44,35 @@ export function EventBar({
   const width =
     (barEndWeek - barStartWeek + 1) * CELL_TOTAL_WIDTH_PX - CELL_GAP_PX;
 
+  // Calculate dynamic height based on number of overlapping events
+  const eventHeight = LANE_HEIGHT_PX / maxLanesUsed;
+
   // Calculate vertical position based on lane
-  const top = lane * LANE_HEIGHT_PX + LANE_TOP_OFFSET_PX;
+  const top = lane * eventHeight + LANE_TOP_OFFSET_PX;
+
+  // Determine text size based on event height
+  const textSize =
+    eventHeight >= 20
+      ? "text-xs"
+      : eventHeight >= 12
+      ? "text-[10px]"
+      : "text-[8px]";
+  const lineHeight =
+    eventHeight >= 20
+      ? "leading-5"
+      : eventHeight >= 12
+      ? "leading-3"
+      : "leading-[10px]";
 
   return (
     <div
-      className="absolute rounded cursor-pointer hover:opacity-80 transition-opacity overflow-hidden pointer-events-auto"
+      className="absolute rounded cursor-pointer hover:opacity-80 transition-opacity overflow-hidden pointer-events-auto flex items-center"
       style={{
         backgroundColor: event.color,
         left: `${left}px`,
         width: `${width}px`,
         top: `${top}px`,
-        height: `${LANE_HEIGHT_PX}px`,
+        height: `${eventHeight}px`,
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -61,7 +80,9 @@ export function EventBar({
       }}
       title={event.name}
     >
-      <span className="text-[9px] text-white font-medium pl-1 whitespace-nowrap leading-[12px]">
+      <span
+        className={`${textSize} ${lineHeight} text-white font-medium px-1.5 whitespace-nowrap truncate`}
+      >
         {event.name}
       </span>
     </div>

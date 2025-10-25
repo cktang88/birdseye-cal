@@ -2,13 +2,13 @@ import {
   startOfYear,
   endOfYear,
   eachWeekOfInterval,
-  getWeek,
   getYear,
   format,
   parseISO,
   startOfWeek
 } from 'date-fns';
 import type { GridCell } from '../types';
+import { EVENT_COLORS } from '../constants/grid';
 
 /**
  * Generate all grid cells for a given year range
@@ -103,27 +103,16 @@ export function getWeekStart(date: Date): Date {
 }
 
 /**
- * Generate a random hex color
+ * Get a color from the fixed palette by index
+ * Returns colors cycling through the palette
+ */
+export function getColorFromPalette(index: number): string {
+  return EVENT_COLORS[index % EVENT_COLORS.length];
+}
+
+/**
+ * Generate a random color from the fixed palette
  */
 export function randomColor(): string {
-  const colors = [
-    '#ef4444', // red
-    '#f97316', // orange
-    '#f59e0b', // amber
-    '#eab308', // yellow
-    '#84cc16', // lime
-    '#22c55e', // green
-    '#10b981', // emerald
-    '#14b8a6', // teal
-    '#06b6d4', // cyan
-    '#0ea5e9', // sky
-    '#3b82f6', // blue
-    '#6366f1', // indigo
-    '#8b5cf6', // violet
-    '#a855f7', // purple
-    '#d946ef', // fuchsia
-    '#ec4899', // pink
-  ];
-
-  return colors[Math.floor(Math.random() * colors.length)];
+  return EVENT_COLORS[Math.floor(Math.random() * EVENT_COLORS.length)];
 }

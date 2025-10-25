@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import type { Event, EventFormData } from '../../types';
-import { toISODateString } from '../../utils/dateHelpers';
+import { useState, useEffect } from "react";
+import type { Event, EventFormData } from "../../types";
+import { toISODateString } from "../../utils/dateHelpers";
+import { EVENT_COLORS } from "../../constants/grid";
 
 interface EventModalProps {
   isOpen: boolean;
@@ -20,10 +21,10 @@ export function EventModal({
   existingEvent,
 }: EventModalProps) {
   const [formData, setFormData] = useState<EventFormData>({
-    name: '',
-    startDate: '',
-    endDate: '',
-    color: '#3b82f6',
+    name: "",
+    startDate: "",
+    endDate: "",
+    color: EVENT_COLORS[0], // Default to first color in palette
   });
 
   const [errors, setErrors] = useState<string[]>([]);
@@ -41,10 +42,13 @@ export function EventModal({
       } else if (initialData) {
         // Creating new event with initial data
         setFormData({
-          name: initialData.name || '',
+          name: initialData.name || "",
           startDate: initialData.startDate || toISODateString(new Date()),
-          endDate: initialData.endDate || initialData.startDate || toISODateString(new Date()),
-          color: initialData.color || '#3b82f6',
+          endDate:
+            initialData.endDate ||
+            initialData.startDate ||
+            toISODateString(new Date()),
+          color: initialData.color || EVENT_COLORS[0],
         });
       }
       setErrors([]);
@@ -55,19 +59,23 @@ export function EventModal({
     const newErrors: string[] = [];
 
     if (!formData.name.trim()) {
-      newErrors.push('Event name is required');
+      newErrors.push("Event name is required");
     }
 
     if (!formData.startDate) {
-      newErrors.push('Start date is required');
+      newErrors.push("Start date is required");
     }
 
     if (!formData.endDate) {
-      newErrors.push('End date is required');
+      newErrors.push("End date is required");
     }
 
-    if (formData.startDate && formData.endDate && formData.endDate < formData.startDate) {
-      newErrors.push('End date must be after or equal to start date');
+    if (
+      formData.startDate &&
+      formData.endDate &&
+      formData.endDate < formData.startDate
+    ) {
+      newErrors.push("End date must be after or equal to start date");
     }
 
     setErrors(newErrors);
@@ -84,7 +92,7 @@ export function EventModal({
   };
 
   const handleDelete = () => {
-    if (onDelete && confirm('Are you sure you want to delete this event?')) {
+    if (onDelete && confirm("Are you sure you want to delete this event?")) {
       onDelete();
       onClose();
     }
@@ -96,7 +104,7 @@ export function EventModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
         <h2 className="text-2xl font-bold mb-4">
-          {existingEvent ? 'Edit Event' : 'Create Event'}
+          {existingEvent ? "Edit Event" : "Create Event"}
         </h2>
 
         <form onSubmit={handleSubmit}>
@@ -108,7 +116,9 @@ export function EventModal({
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter event name"
               autoFocus
@@ -123,7 +133,9 @@ export function EventModal({
             <input
               type="date"
               value={formData.startDate}
-              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, startDate: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -136,22 +148,34 @@ export function EventModal({
             <input
               type="date"
               value={formData.endDate}
-              onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, endDate: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Color */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Color
             </label>
-            <input
-              type="color"
-              value={formData.color}
-              onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-              className="w-full h-10 px-1 py-1 border border-gray-300 rounded-md cursor-pointer"
-            />
+            <div className="flex gap-2 flex-wrap">
+              {EVENT_COLORS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, color })}
+                  className={`w-10 h-10 rounded-md transition-all ${
+                    formData.color === color
+                      ? "ring-2 ring-offset-2 ring-gray-800 scale-110"
+                      : "hover:scale-105"
+                  }`}
+                  style={{ backgroundColor: color }}
+                  title={color}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Errors */}
@@ -187,7 +211,7 @@ export function EventModal({
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
-              {existingEvent ? 'Save' : 'Create'}
+              {existingEvent ? "Save" : "Create"}
             </button>
           </div>
         </form>
