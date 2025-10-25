@@ -116,3 +116,27 @@ export function getColorFromPalette(index: number): string {
 export function randomColor(): string {
   return EVENT_COLORS[Math.floor(Math.random() * EVENT_COLORS.length)];
 }
+
+/**
+ * Get month boundaries based on actual calendar days
+ * Returns array of { month: string, dayPosition: number } for each month
+ * dayPosition represents cumulative days from start of year
+ */
+export function getMonthBoundaries(): Array<{ month: string; dayPosition: number }> {
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  // Days in each month (ignoring leap years as requested)
+  const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  
+  const boundaries: Array<{ month: string; dayPosition: number }> = [];
+  let cumulativeDays = 0;
+  
+  for (let i = 0; i < 12; i++) {
+    boundaries.push({
+      month: monthNames[i],
+      dayPosition: cumulativeDays
+    });
+    cumulativeDays += daysInMonth[i];
+  }
+  
+  return boundaries;
+}

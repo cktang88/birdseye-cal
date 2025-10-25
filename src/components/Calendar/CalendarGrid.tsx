@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import type { GridCell as GridCellType, DragState, Event } from "../../types";
-import { generateGridCells } from "../../utils/dateHelpers";
+import { generateGridCells, getMonthBoundaries } from "../../utils/dateHelpers";
 import { GridCell } from "./GridCell";
 import { EventBar } from "./EventBar";
 import type { EventLayoutInfo } from "../../utils/eventLayout";
@@ -132,6 +132,9 @@ export function CalendarGrid({
     ...Array.from(cellsByYear.values()).map((cells) => cells.length)
   );
 
+  // Get month boundaries based on actual calendar days
+  const monthBoundaries = useMemo(() => getMonthBoundaries(), []);
+
   return (
     <div
       className="overflow-auto p-4"
@@ -139,19 +142,28 @@ export function CalendarGrid({
       onMouseLeave={handleContainerMouseUp}
     >
       <div className="inline-block">
-        {/* Header: Week numbers */}
-        <div className="flex mb-2">
+        {/* Header: Month labels */}
+        <div className="flex mb-2 relative">
           {/* w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
           <div className="w-16 shrink-0" /> {/* Year label space */}
-          {Array.from({ length: maxWeeks }, (_, i) => (
-            <div
-              key={i}
-              // w-12 = CELL_WIDTH_PX (48px)
-              className="w-12 text-xs text-gray-400 text-center shrink-0"
-            >
-              {(i + 1) % 5 === 0 ? i + 1 : ""}
-            </div>
-          ))}
+          <div
+            className="relative block h-4"
+            style={{ width: `${maxWeeks * 52}px` }}
+          >
+            {monthBoundaries.map((boundary) => {
+              // Convert days to week position: dayPosition / 7 * (CELL_WIDTH_PX + CELL_GAP_PX)
+              const leftPosition = (boundary.dayPosition / 7) * 52;
+              return (
+                <div
+                  key={boundary.month}
+                  className="absolute text-xs text-gray-600"
+                  style={{ left: `${leftPosition}px` }}
+                >
+                  {boundary.month}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Grid rows by year */}
@@ -178,6 +190,21 @@ export function CalendarGrid({
                     isInDragSelection={isCellInDragSelection(cell)}
                   />
                 ))}
+
+                {/* Month boundary lines */}
+                {monthBoundaries.map((boundary) => {
+                  if (boundary.dayPosition === 0) return null; // Don't show line at the very start
+                  // Convert days to pixel position: dayPosition / 7 * (CELL_WIDTH_PX + CELL_GAP_PX)
+                  // Subtract CELL_GAP_PX/2 to account for the gap
+                  const leftPosition = (boundary.dayPosition / 7) * 52 - 2;
+                  return (
+                    <div
+                      key={`${year}-${boundary.month}`}
+                      className="absolute top-0 bottom-0 w-0.5 bg-gray-800 pointer-events-none"
+                      style={{ left: `${leftPosition}px` }}
+                    />
+                  );
+                })}
 
                 {/* Event bars overlay for this year */}
                 <div className="absolute inset-0 pointer-events-none">
