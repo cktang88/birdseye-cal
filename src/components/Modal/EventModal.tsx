@@ -42,6 +42,8 @@ export function EventModal({
   const [useDurationMode, setUseDurationMode] = useState(true); // Default to duration mode
   const [durationInput, setDurationInput] = useState("");
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const durationInputRef = useRef<HTMLInputElement>(null);
+  const endDateInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -247,6 +249,23 @@ export function EventModal({
     setAutocompleteSuggestion("");
   };
 
+  const handleToggleMode = () => {
+    const newMode = !useDurationMode;
+    setUseDurationMode(newMode);
+
+    // Focus and select the input after React re-renders
+    // setTimeout needed because React state updates are async
+    setTimeout(() => {
+      if (newMode && durationInputRef.current) {
+        durationInputRef.current.focus();
+        durationInputRef.current.select();
+      } else if (!newMode && endDateInputRef.current) {
+        endDateInputRef.current.focus();
+        endDateInputRef.current.select();
+      }
+    }, 0);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -308,7 +327,7 @@ export function EventModal({
               </label>
               <button
                 type="button"
-                onClick={() => setUseDurationMode(!useDurationMode)}
+                onClick={handleToggleMode}
                 className="text-xs text-blue-600 hover:text-blue-800 underline"
               >
                 {useDurationMode
@@ -318,6 +337,7 @@ export function EventModal({
             </div>
             {useDurationMode ? (
               <input
+                ref={durationInputRef}
                 type="text"
                 value={durationInput}
                 onChange={(e) => setDurationInput(e.target.value)}
@@ -326,6 +346,7 @@ export function EventModal({
               />
             ) : (
               <input
+                ref={endDateInputRef}
                 type="date"
                 value={formData.endDate}
                 onChange={(e) => handleEndDateChange(e.target.value)}
