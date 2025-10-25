@@ -1,18 +1,25 @@
 import { useState, useMemo } from "react";
-import type { GridCell as GridCellType, DragState } from "../../types";
+import type { GridCell as GridCellType, DragState, Event } from "../../types";
 import { generateGridCells } from "../../utils/dateHelpers";
 import { GridCell } from "./GridCell";
+import { EventBar } from "./EventBar";
 
 interface CalendarGridProps {
   startYear: number;
   endYear: number;
+  events: Event[];
+  eventLanesByYear: Map<number, Map<string, number>>;
   onCreateEvent: (startCell: GridCellType, endCell?: GridCellType) => void;
+  onEventClick: (event: Event) => void;
 }
 
 export function CalendarGrid({
   startYear,
   endYear,
+  events,
+  eventLanesByYear,
   onCreateEvent,
+  onEventClick,
 }: CalendarGridProps) {
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
@@ -155,8 +162,8 @@ export function CalendarGrid({
                 {year}
               </div>
 
-              {/* Week cells */}
-              <div className="flex gap-1">
+              {/* Week cells with event bars overlay */}
+              <div className="relative flex gap-1">
                 {cells.map((cell) => (
                   <GridCell
                     key={`${cell.year}-${cell.week}`}
@@ -168,6 +175,23 @@ export function CalendarGrid({
                     isInDragSelection={isCellInDragSelection(cell)}
                   />
                 ))}
+
+                {/* Event bars overlay for this year */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {events.map((event) => {
+                    const lane = eventLanesByYear.get(year)?.get(event.id) ?? 0;
+                    return (
+                      <EventBar
+                        key={event.id}
+                        event={event}
+                        year={year}
+                        maxWeeks={maxWeeks}
+                        lane={lane}
+                        onEventClick={onEventClick}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             </div>
           );

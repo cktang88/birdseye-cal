@@ -38,7 +38,7 @@ export function EventBar({
 
   // Calculate vertical position based on lane (cell height is 48px, each lane is 12px)
   const laneHeight = 10; // 25% of 48px
-  const top = lane * laneHeight + 18;
+  const top = lane * laneHeight + 4;
 
   return (
     <div

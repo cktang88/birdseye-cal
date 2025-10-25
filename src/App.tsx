@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { CalendarGrid } from "./components/Calendar/CalendarGrid";
-import { EventBar } from "./components/Calendar/EventBar";
 import { EventModal } from "./components/Modal/EventModal";
 import { useEventStore } from "./store/eventStore";
 import type { Event, GridCell, EventFormData } from "./types";
@@ -63,9 +62,6 @@ function App() {
     setModalState({ isOpen: false });
   };
 
-  // Group cells by year for event rendering
-  const maxWeeks = 53;
-
   // Calculate event lanes for each year to prevent overlapping
   const eventLanesByYear = useMemo(() => {
     const lanesByYear = new Map<number, Map<string, number>>();
@@ -86,62 +82,16 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="relative">
-        {/* Calendar Grid */}
+      <main>
+        {/* Calendar Grid with integrated event bars */}
         <CalendarGrid
           startYear={yearRange.start}
           endYear={yearRange.end}
+          events={events}
+          eventLanesByYear={eventLanesByYear}
           onCreateEvent={handleCreateEvent}
+          onEventClick={handleEventClick}
         />
-
-        {/* Event Bars Overlay */}
-        <div className="absolute top-0 left-0 pointer-events-none p-4">
-          <div className="inline-block">
-            {/* Header space to match grid header */}
-            <div className="flex mb-2">
-              <div className="w-16 shrink-0" />
-              <div className="flex gap-1">
-                {Array.from({ length: maxWeeks }, (_, i) => (
-                  <div key={i} className="w-12" />
-                ))}
-              </div>
-            </div>
-
-            {/* Year rows */}
-            {Array.from(
-              { length: yearRange.end - yearRange.start + 1 },
-              (_, i) => yearRange.start + i
-            ).map((year) => (
-              <div key={year} className="flex mb-2">
-                {/* Year label space */}
-                <div className="w-16 shrink-0" />
-
-                {/* Event bars for this year */}
-                <div className="relative flex gap-1" style={{ height: "48px" }}>
-                  {Array.from({ length: maxWeeks }, (_, i) => (
-                    <div key={i} className="w-12 h-12" />
-                  ))}
-                  <div className="absolute inset-0">
-                    {events.map((event) => {
-                      const lane =
-                        eventLanesByYear.get(year)?.get(event.id) ?? 0;
-                      return (
-                        <EventBar
-                          key={event.id}
-                          event={event}
-                          year={year}
-                          maxWeeks={maxWeeks}
-                          lane={lane}
-                          onEventClick={handleEventClick}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </main>
 
       {/* Event Modal */}
