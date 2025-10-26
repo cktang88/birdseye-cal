@@ -6,6 +6,7 @@ import { useUserStore, DEFAULT_CALENDAR_ID } from "../../store/userStore";
 import { useEventStore } from "../../store/eventStore";
 import { Dropdown } from "../ui/Dropdown";
 import { parseDurationAndCalculateEndDate } from "../../utils/dateHelpers";
+import { askConfirm } from "../../utils/dialogHelpers";
 
 interface EventModalProps {
   isOpen: boolean;
@@ -234,10 +235,20 @@ export function EventModal({
     }
   };
 
-  const handleDelete = () => {
-    if (onDelete && confirm("Are you sure you want to delete this event?")) {
-      onDelete();
-      onClose();
+  const handleDelete = async () => {
+    if (onDelete) {
+      const confirmed = await askConfirm(
+        "Are you sure you want to delete this event?",
+        {
+          title: "Delete Event",
+          okLabel: "Delete",
+          cancelLabel: "Cancel",
+        }
+      );
+      if (confirmed) {
+        onDelete();
+        onClose();
+      }
     }
   };
 

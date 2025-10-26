@@ -2,6 +2,8 @@
 
 A frontend-only React application for visualizing long-running events across months and years. Events are displayed as horizontal bars on a grid where the x-axis represents months and the y-axis represents years.
 
+Release
+
 ![Calendar View](./image.png)
 
 ## Features
@@ -43,3 +45,4 @@ A frontend-only React application for visualizing long-running events across mon
 - Zustand (state management)
 - Lucide React (icons)
 - LocalStorage (persistence)
+- tauri (desktop app)

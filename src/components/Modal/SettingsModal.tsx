@@ -3,6 +3,7 @@ import { useUserStore, DEFAULT_CALENDAR_ID } from "../../store/userStore";
 import { useEventStore } from "../../store/eventStore";
 import { EVENT_COLORS } from "../../constants/grid";
 import { Download, Upload, Edit2, Copy, Trash2 } from "lucide-react";
+import { askConfirm, showMessage } from "../../utils/dialogHelpers";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -64,16 +65,23 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     }
   };
 
-  const handleDeleteCalendar = (id: string) => {
+  const handleDeleteCalendar = async (id: string) => {
     if (id === DEFAULT_CALENDAR_ID) {
-      alert("Cannot delete the default calendar");
+      await showMessage("Cannot delete the default calendar", {
+        title: "Cannot Delete",
+        okLabel: "OK",
+      });
       return;
     }
-    if (
-      confirm(
-        "Are you sure you want to delete this calendar? All events in this calendar will also be permanently deleted."
-      )
-    ) {
+    const confirmed = await askConfirm(
+      "Are you sure you want to delete this calendar? All events in this calendar will also be permanently deleted.",
+      {
+        title: "Delete Calendar",
+        okLabel: "Delete",
+        cancelLabel: "Cancel",
+      }
+    );
+    if (confirmed) {
       deleteEventsByCalendar(id);
       deleteCalendar(id);
     }
@@ -167,7 +175,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const importData = JSON.parse(e.target?.result as string);
 
@@ -177,7 +185,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           !importData.events ||
           !Array.isArray(importData.events)
         ) {
-          alert("Invalid calendar file format");
+          await showMessage("Invalid calendar file format", {
+            title: "Import Error",
+            okLabel: "OK",
+          });
           return;
         }
 
@@ -216,9 +227,18 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           }
         );
 
-        alert(`Calendar "${uniqueName}" imported successfully!`);
+        await showMessage(`Calendar "${uniqueName}" imported successfully!`, {
+          title: "Import Successful",
+          okLabel: "OK",
+        });
       } catch (error) {
-        alert("Error importing calendar: " + (error as Error).message);
+        await showMessage(
+          "Error importing calendar: " + (error as Error).message,
+          {
+            title: "Import Error",
+            okLabel: "OK",
+          }
+        );
       }
     };
     reader.readAsText(file);
@@ -240,7 +260,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {/* Birthday Input */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Your Birthday
+              Your Birthdate
             </label>
             <input
               type="date"
