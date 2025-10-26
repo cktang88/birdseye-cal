@@ -82,8 +82,22 @@ export function EventModal({
         });
         setIsManualColorChange(false); // New event, allow auto color matching
         setUseDurationMode(true); // Default to duration mode for new events
-        // Use the calculated duration from drag selection, or default to 1 month
-        setDurationInput(initialData.duration || "1m");
+
+        // If duration is less than 1 month (e.g., "1d", "5d", "2w"), default to 1 month
+        let defaultDuration = "1m";
+        if (initialData.duration) {
+          const durationStr = initialData.duration;
+          const match = durationStr.match(/^([\d.]+)([dwmy])$/);
+          if (match) {
+            const value = parseFloat(match[1]);
+            const unit = match[2];
+            // Only use the calculated duration if it's >= 1 month
+            if ((unit === "m" && value >= 1) || unit === "y") {
+              defaultDuration = durationStr;
+            }
+          }
+        }
+        setDurationInput(defaultDuration);
       }
       setErrors([]);
       setAutocompleteSuggestion("");
