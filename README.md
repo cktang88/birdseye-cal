@@ -2,7 +2,7 @@
 
 A frontend-only React application for visualizing long-running events across months and years. Events are displayed as horizontal bars on a grid where the x-axis represents months and the y-axis represents years.
 
-Latest release: [download here](./https://github.com/cktang88/birdseye-cal/releases)
+Latest release: [download here](./releases)
 
 ![Calendar View](./image.png)
 
