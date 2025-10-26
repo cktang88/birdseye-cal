@@ -39,27 +39,35 @@ export function calculateEventLanes(
         event,
         startMonth: barStartMonth,
         endMonth: barEndMonth,
+        startDate: event.startDate,
+        endDate: event.endDate,
       };
     })
     .filter((e) => e !== null)
-    .sort((a, b) => a!.startMonth - b!.startMonth);
+    .sort((a, b) => {
+      // Sort by actual start date, not just month
+      return a!.startDate.localeCompare(b!.startDate);
+    });
 
-  // Track which lanes are occupied by which month ranges
-  // lanes[i] = endMonth of the event currently occupying lane i (or -1 if free)
-  const lanes: number[] = [-1, -1, -1, -1, -1, -1]; // Support up to 6 lanes
+  // Track which lanes are occupied by actual end dates
+  // lanes[i] = endDate (ISO string) of the event currently occupying lane i (or null if free)
+  const lanes: (string | null)[] = [null, null, null, null, null, null]; // Support up to 6 lanes
 
   for (const item of yearEvents) {
     if (!item) continue;
 
-    const { event, startMonth, endMonth } = item;
+    const { event, startDate, endDate } = item;
 
     // Find the first available lane (topmost lane that's free)
     let assignedLane = -1;
     for (let lane = 0; lane < lanes.length; lane++) {
-      if (lanes[lane] < startMonth) {
-        // This lane is free at the start month
+      // A lane is free if it's empty or if the previous event's end date
+      // is before or on the same day as the current event's start date
+      // (events touching on the same day should not overlap)
+      if (lanes[lane] === null || lanes[lane]! <= startDate) {
+        // This lane is free at the start date
         assignedLane = lane;
-        lanes[lane] = endMonth;
+        lanes[lane] = endDate;
         break;
       }
     }
@@ -67,7 +75,7 @@ export function calculateEventLanes(
     // If no lane found, assign to lane 0 (will overlap, but better than nothing)
     if (assignedLane === -1) {
       assignedLane = 0;
-      lanes[0] = endMonth;
+      lanes[0] = endDate;
     }
 
     laneMap.set(event.id, assignedLane);
