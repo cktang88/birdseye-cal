@@ -1,10 +1,10 @@
 [package]
 name = "app"
-version = "0.2.0"
-description = "A Tauri App"
+version = "0.3.0"
+description = "A calendar with long-running events"
 authors = ["cktang88"]
-license = ""
-repository = ""
+license = "MIT"
+repository = "https://github.com/cktang88/birdseye-calendar"
 edition = "2021"
 rust-version = "1.77.2"
 

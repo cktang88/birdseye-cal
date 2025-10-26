@@ -3,4 +3,18 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
+  /* Prevent text selection during drag operations in Tauri */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in input fields and text areas */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Prevent drag ghosting and selection in Tauri */
+* {
+  -webkit-user-drag: none;
 }
