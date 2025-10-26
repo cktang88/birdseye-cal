@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Birdseye Calendar",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "identifier": "com.birdseye.calendar",
   "build": {
     "frontendDist": "../dist",
@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Birdseye Calendar",
-        "width": 800,
-        "height": 600,
+        "width": 1920,
+        "height": 1080,
         "resizable": true,
         "fullscreen": false
       }
