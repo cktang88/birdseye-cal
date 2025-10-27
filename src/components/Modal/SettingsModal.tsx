@@ -14,6 +14,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const {
     birthday,
     setBirthday,
+    defaultEventDuration,
+    setDefaultEventDuration,
     calendars,
     addCalendar,
     deleteCalendar,
@@ -22,6 +24,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   } = useUserStore();
   const { events, addEvent, deleteEventsByCalendar } = useEventStore();
   const [birthdayInput, setBirthdayInput] = useState<string>("");
+  const [durationInput, setDurationInput] = useState<string>("");
   const [newCalendarName, setNewCalendarName] = useState<string>("");
   const [newCalendarColor, setNewCalendarColor] = useState<string>(
     EVENT_COLORS[0]
@@ -35,16 +38,30 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   useEffect(() => {
     if (isOpen) {
       setBirthdayInput(birthday || "");
+      setDurationInput(defaultEventDuration);
       setNewCalendarName("");
       setNewCalendarColor(EVENT_COLORS[0]);
       setEditingCalendarId(null);
       setEditingName("");
     }
-  }, [isOpen, birthday]);
+  }, [isOpen, birthday, defaultEventDuration]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setBirthday(birthdayInput || null);
+
+    // Validate and save duration
+    const durationMatch = durationInput
+      .trim()
+      .match(/^(\d+\.?\d*)\s*([ymwdh])$/i);
+    if (durationMatch) {
+      setDefaultEventDuration(durationInput.trim().toLowerCase());
+    } else if (durationInput.trim() === "") {
+      // If empty, reset to default
+      setDefaultEventDuration("1m");
+    }
+    // If invalid, just keep the current setting (don't update)
+
     onClose();
   };
 
@@ -271,6 +288,24 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             />
             <p className="text-xs text-gray-500 mt-1">
               Your age will be displayed on each birthday month in the calendar
+            </p>
+          </div>
+
+          {/* Default Event Duration */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Default Event Duration
+            </label>
+            <input
+              type="text"
+              value={durationInput}
+              onChange={(e) => setDurationInput(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+              placeholder="e.g., 1m, 3m, 6m, 1y"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Minimum duration for new events (e.g., "1m" = 1 month, "3m" = 3
+              months, "6m" = 6 months, "1y" = 1 year)
             </p>
           </div>
 

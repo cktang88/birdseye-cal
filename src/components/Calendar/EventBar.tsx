@@ -57,14 +57,16 @@ export function EventBar({
   let monthsSpanned =
     barEndMonth - barStartMonth + 1 - startFraction + endFraction - 1;
 
-  // Normalize 1-month events to exactly 1.0 to ensure consistent visual length
-  // Check if this is approximately a 1-month event (within a small tolerance)
-  const MONTH_TOLERANCE = 0.1; // 10% tolerance (~3 days)
+  // Normalize events to integer month values for consistent visual length
+  // Check if the event is approximately an integer number of months (within tolerance)
+  const MONTH_TOLERANCE = 0.1; // 10% tolerance (~3 days per month)
+  const nearestMonth = Math.round(monthsSpanned);
   if (
-    monthsSpanned >= 1.0 - MONTH_TOLERANCE &&
-    monthsSpanned <= 1.0 + MONTH_TOLERANCE
+    nearestMonth >= 1 &&
+    monthsSpanned >= nearestMonth - MONTH_TOLERANCE &&
+    monthsSpanned <= nearestMonth + MONTH_TOLERANCE
   ) {
-    monthsSpanned = 1.0;
+    monthsSpanned = nearestMonth;
   }
 
   const widthPercent = (monthsSpanned / 12) * 100 - 0.2; // Subtract small gap

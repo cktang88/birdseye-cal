@@ -8,10 +8,12 @@ interface UserSettings {
   birthday: string | null; // ISO date string (YYYY-MM-DD)
   calendars: Calendar[];
   activeCalendarId: string;
+  defaultEventDuration: string; // Duration string like "1m", "3m", "6m", etc.
 }
 
 interface UserStore extends UserSettings {
   setBirthday: (birthday: string | null) => void;
+  setDefaultEventDuration: (duration: string) => void;
   addCalendar: (calendar: Omit<Calendar, "id">) => string; // returns new calendar id
   updateCalendar: (id: string, updates: Partial<Omit<Calendar, "id">>) => void;
   deleteCalendar: (id: string) => void;
@@ -33,8 +35,11 @@ export const useUserStore = create<UserStore>()(
         },
       ],
       activeCalendarId: DEFAULT_CALENDAR_ID,
+      defaultEventDuration: "1m", // Default to 1 month, but configurable
 
       setBirthday: (birthday) => set({ birthday }),
+
+      setDefaultEventDuration: (duration) => set({ defaultEventDuration: duration }),
 
       addCalendar: (calendarData) => {
         const newCalendar: Calendar = {

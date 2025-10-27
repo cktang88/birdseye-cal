@@ -25,7 +25,7 @@ export function EventModal({
   initialData,
   existingEvent,
 }: EventModalProps) {
-  const { calendars, activeCalendarId } = useUserStore();
+  const { calendars, activeCalendarId, defaultEventDuration } = useUserStore();
   const { events } = useEventStore();
 
   const [formData, setFormData] = useState<EventFormData>({
@@ -70,17 +70,60 @@ export function EventModal({
       } else if (initialData) {
         // Creating new event with initial data - use duration mode
 
-        // If duration is less than 1 month (e.g., "1d", "5d", "2w"), default to 1 month
-        let defaultDuration = "1m";
+        // Parse the configured default duration to get minimum threshold
+        const minDurationMatch =
+          defaultEventDuration.match(/^([\d.]+)([dwmy])$/);
+        const minValue = minDurationMatch ? parseFloat(minDurationMatch[1]) : 1;
+        const minUnit = minDurationMatch ? minDurationMatch[2] : "m";
+
+        // Convert minimum duration to months for comparison
+        let minMonths = 0;
+        switch (minUnit) {
+          case "y":
+            minMonths = minValue * 12;
+            break;
+          case "m":
+            minMonths = minValue;
+            break;
+          case "w":
+            minMonths = minValue / 4.345;
+            break; // Approximate weeks to months
+          case "d":
+            minMonths = minValue / 30.44;
+            break; // Approximate days to months
+          default:
+            minMonths = 1;
+        }
+
+        // If duration is less than the configured minimum, default to configured duration
+        let eventDuration = defaultEventDuration;
         if (initialData.duration) {
           const durationStr = initialData.duration;
           const match = durationStr.match(/^([\d.]+)([dwmy])$/);
           if (match) {
             const value = parseFloat(match[1]);
             const unit = match[2];
-            // Only use the calculated duration if it's >= 1 month
-            if ((unit === "m" && value >= 1) || unit === "y") {
-              defaultDuration = durationStr;
+
+            // Convert current duration to months for comparison
+            let currentMonths = 0;
+            switch (unit) {
+              case "y":
+                currentMonths = value * 12;
+                break;
+              case "m":
+                currentMonths = value;
+                break;
+              case "w":
+                currentMonths = value / 4.345;
+                break;
+              case "d":
+                currentMonths = value / 30.44;
+                break;
+            }
+
+            // Only use the calculated duration if it's >= minimum configured duration
+            if (currentMonths >= minMonths) {
+              eventDuration = durationStr;
             }
           }
         }
@@ -89,7 +132,7 @@ export function EventModal({
         const correctedEndDate =
           parseDurationAndCalculateEndDate(
             initialData.startDate || toISODateString(new Date()),
-            defaultDuration
+            eventDuration
           ) ||
           initialData.endDate ||
           initialData.startDate ||
@@ -102,16 +145,22 @@ export function EventModal({
           color: initialData.color || EVENT_COLORS[0],
           calendarId:
             initialData.calendarId || activeCalendarId || DEFAULT_CALENDAR_ID,
-          duration: defaultDuration,
+          duration: eventDuration,
         });
         setIsManualColorChange(false); // New event, allow auto color matching
         setUseDurationMode(true); // Default to duration mode for new events
-        setDurationInput(defaultDuration);
+        setDurationInput(eventDuration);
       }
       setErrors([]);
       setAutocompleteSuggestion("");
     }
-  }, [isOpen, initialData, existingEvent, activeCalendarId]);
+  }, [
+    isOpen,
+    initialData,
+    existingEvent,
+    activeCalendarId,
+    defaultEventDuration,
+  ]);
 
   // Auto-match color based on event name (only for new events in the same calendar)
   useEffect(() => {
