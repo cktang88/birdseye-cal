@@ -35,7 +35,17 @@ function App() {
 
   const handleCreateEvent = (startCell: GridCell, endCell?: GridCell) => {
     let startDate = toISODateString(startCell.date);
-    let endDate = endCell ? toISODateString(endCell.date) : startDate;
+
+    // For the end date, use the last day of the selected month to make selection inclusive
+    let endDate: string;
+    if (endCell) {
+      const endMonthDate = new Date(endCell.year, endCell.month, 0); // Last day of the month
+      endDate = toISODateString(endMonthDate);
+    } else {
+      // Single cell selection - use last day of that month
+      const endMonthDate = new Date(startCell.year, startCell.month, 0);
+      endDate = toISODateString(endMonthDate);
+    }
 
     // Swap dates if user dragged backwards
     if (endDate < startDate) {

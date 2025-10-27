@@ -274,10 +274,18 @@ export function calculateDurationFromDates(
   // Calculate month difference
   const startYear = start.getFullYear();
   const startMonth = start.getMonth();
+  const startDay = start.getDate();
   const endYear = end.getFullYear();
   const endMonth = end.getMonth();
+  const endDay = end.getDate();
 
-  const monthDiff = (endYear - startYear) * 12 + (endMonth - startMonth) + 1;
+  // Calculate the number of full or partial months between the dates
+  let monthDiff = (endYear - startYear) * 12 + (endMonth - startMonth);
+  
+  // If the end day is greater than or equal to start day, count it as a full additional month
+  if (endDay >= startDay) {
+    monthDiff += 1;
+  }
 
   // If less than 12 months, return in months
   if (monthDiff < 12) {
