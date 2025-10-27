@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+:root {
+  /* Base dimensions at 100% scale */
+  --cell-width: 128px;
+  --cell-height: 100px;
+  --year-label-width: 64px;
+  
+  /* Calculate total calendar width (12 months + year label) */
+  --calendar-base-width: calc(12 * var(--cell-width) + var(--year-label-width));
+  
+  /* Min/max widths for the calendar */
+  --calendar-min-width: 1000px;
+  --calendar-max-width: 2400px;
+  
+  /* Scale factor based on viewport */
+  --calendar-scale: 1;
+}
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
@@ -17,4 +34,90 @@ input, textarea, [contenteditable="true"] {
 /* Prevent drag ghosting and selection in Tauri */
 * {
   -webkit-user-drag: none;
+}
+
+/* Calendar responsive container */
+.calendar-container {
+  /* Use a range that keeps the calendar readable */
+  min-width: var(--calendar-min-width);
+  max-width: var(--calendar-max-width);
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Calendar header */
+.calendar-header {
+  display: flex;
+  position: relative;
+}
+
+.calendar-months-header {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  flex: 1;
+}
+
+.calendar-month-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 2px;
+  min-width: 0;
+  /* Font size scales smoothly between min and max viewport widths */
+  font-size: clamp(0.55rem, 0.4rem + 0.5vw, 0.75rem);
+}
+
+/* Calendar year row */
+.calendar-year-row {
+  display: flex;
+  align-items: stretch;
+}
+
+.calendar-year-label {
+  width: var(--year-label-width);
+  flex-shrink: 0;
+  /* Font size scales smoothly with viewport */
+  font-size: clamp(0.7rem, 0.6rem + 0.4vw, 1rem);
+}
+
+.calendar-months-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  flex: 1;
+}
+
+/* Calendar cells - use CSS Grid for responsive sizing */
+.calendar-cell {
+  /* Height scales based on width to maintain aspect ratio */
+  aspect-ratio: 1.28; /* 128/100 = 1.28 */
+  min-height: 60px; /* Minimum readable height */
+  position: relative;
+}
+
+/* Scale the calendar content based on container width */
+@media (max-width: 1600px) {
+  :root {
+    --calendar-scale: calc(100vw / 1600);
+  }
+  
+  .calendar-container {
+    min-width: 100%;
+  }
+}
+
+@media (min-width: 2400px) {
+  :root {
+    --calendar-scale: 1.5;
+  }
+}
+
+/* Adjust year label width for smaller screens */
+@media (max-width: 1000px) {
+  :root {
+    --year-label-width: 48px;
+  }
 }

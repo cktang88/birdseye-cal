@@ -28,9 +28,8 @@ export function GridCell({
 
   return (
     <div
-      // w-32 = CELL_WIDTH_PX (128px), h-25 = CELL_HEIGHT_PX (100px)
       className={`
-        w-32 h-25
+        calendar-cell
         ${
           isQuarterEnd
             ? "border-r-2 border-gray-300"
@@ -42,7 +41,7 @@ export function GridCell({
         transition-colors
         relative
         bg-transparent
-        ${isInDragSelection ? "!bg-blue-100" : ""}
+        ${isInDragSelection ? "bg-blue-100!" : ""}
       `}
       onClick={() => onCellClick(cell)}
       onMouseDown={() => onCellMouseDown(cell)}

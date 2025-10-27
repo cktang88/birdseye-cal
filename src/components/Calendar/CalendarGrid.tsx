@@ -144,16 +144,15 @@ export function CalendarGrid({
       onMouseUp={handleContainerMouseUp}
       onMouseLeave={handleContainerMouseUp}
     >
-      <div className="w-[90%] mx-auto">
+      <div className="calendar-container">
         {/* Header: Month labels */}
-        <div className="flex mb-2 relative">
-          {/* w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
-          <div className="w-16 shrink-0" /> {/* Year label space */}
-          <div className="flex">
+        <div className="calendar-header mb-2">
+          <div className="calendar-year-label" /> {/* Year label space */}
+          <div className="calendar-months-header">
             {monthNames.map((monthName, index) => (
               <div
                 key={index}
-                className="w-32 text-xs text-gray-600 text-center"
+                className="calendar-month-label text-xs text-gray-600 text-center"
               >
                 {monthName}
               </div>
@@ -169,19 +168,17 @@ export function CalendarGrid({
           return (
             <div
               key={year}
-              className={`flex items-stretch ${
+              className={`calendar-year-row ${
                 yearIndex > 0 ? "border-t-2 border-gray-400" : "mb-4"
-              } ${
-                isEvenYear ? "bg-gray-50" : "bg-white"
-              } -mx-4 px-4 py-8 h-full`}
+              } ${isEvenYear ? "bg-gray-50" : "bg-white"} -mx-4 px-4 py-8`}
             >
-              {/* Year label - w-16 = YEAR_LABEL_WIDTH_PX (64px) */}
-              <div className="w-16 shrink-0 text-base font-bold text-gray-800 pr-2 text-right select-none">
+              {/* Year label */}
+              <div className="calendar-year-label text-base font-bold text-gray-800 pr-2 text-right select-none">
                 {year}
               </div>
 
               {/* Month cells with event bars overlay */}
-              <div className="relative flex">
+              <div className="calendar-months-row">
                 {cells.map((cell) => (
                   <GridCell
                     key={`${cell.year}-${cell.month}`}

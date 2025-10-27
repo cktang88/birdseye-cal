@@ -5,12 +5,7 @@ import {
   getMonthFraction,
   getMonthFractionEnd,
 } from "../../utils/dateHelpers";
-import {
-  CELL_TOTAL_WIDTH_PX,
-  CELL_GAP_PX,
-  LANE_HEIGHT_PX,
-  LANE_TOP_OFFSET_PX,
-} from "../../constants/grid";
+import { LANE_HEIGHT_PX, LANE_TOP_OFFSET_PX } from "../../constants/grid";
 import { getDarkerTextColor } from "../../utils/colorHelpers";
 
 interface EventBarProps {
@@ -53,25 +48,15 @@ export function EventBar({
   // For end: if event ends in this year, use the day fraction (inclusive); otherwise end at 1.0 (full month)
   const endFraction = endPos.year === year ? getMonthFractionEnd(endDate) : 1.0;
 
-  // Position in pixels with fractional offsets
-  // Start position: month cell start + fractional offset within that month
-  const left =
-    (barStartMonth - 1) * CELL_TOTAL_WIDTH_PX +
-    startFraction * CELL_TOTAL_WIDTH_PX;
+  // Position as percentage (each month is 1/12 = 8.333...%)
+  // Start position: (month-1) / 12 + (fraction within that month / 12)
+  const leftPercent = ((barStartMonth - 1 + startFraction) / 12) * 100;
 
-  // Width calculation:
-  // - Total months spanned in pixels
-  // - Add the end fraction (portion of the end month)
-  // - Subtract the start fraction (portion of start month we're not using)
-  // - Subtract the gap
-  const totalMonthsWidth =
-    (barEndMonth - barStartMonth + 1) * CELL_TOTAL_WIDTH_PX;
-  const width =
-    totalMonthsWidth -
-    startFraction * CELL_TOTAL_WIDTH_PX +
-    endFraction * CELL_TOTAL_WIDTH_PX -
-    CELL_TOTAL_WIDTH_PX -
-    CELL_GAP_PX;
+  // Width calculation as percentage:
+  // Total months spanned, adjusted for fractional start and end
+  const monthsSpanned =
+    barEndMonth - barStartMonth + 1 - startFraction + endFraction - 1;
+  const widthPercent = (monthsSpanned / 12) * 100 - 0.2; // Subtract small gap
 
   // Calculate dynamic height based on number of overlapping events
   // Minimum of 2 lanes to ensure single events are 50% of max height
@@ -115,8 +100,8 @@ export function EventBar({
       className="absolute cursor-pointer hover:opacity-80 transition-opacity overflow-hidden pointer-events-auto flex items-center select-none"
       style={{
         backgroundColor: event.color,
-        left: `${left}px`,
-        width: `${width}px`,
+        left: `${leftPercent}%`,
+        width: `${widthPercent}%`,
         top: `${top}px`,
         height: `${eventHeight}px`,
         borderRadius,
