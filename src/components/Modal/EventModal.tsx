@@ -69,20 +69,6 @@ export function EventModal({
         }
       } else if (initialData) {
         // Creating new event with initial data - use duration mode
-        setFormData({
-          name: initialData.name || "",
-          startDate: initialData.startDate || toISODateString(new Date()),
-          endDate:
-            initialData.endDate ||
-            initialData.startDate ||
-            toISODateString(new Date()),
-          color: initialData.color || EVENT_COLORS[0],
-          calendarId:
-            initialData.calendarId || activeCalendarId || DEFAULT_CALENDAR_ID,
-          duration: initialData.duration,
-        });
-        setIsManualColorChange(false); // New event, allow auto color matching
-        setUseDurationMode(true); // Default to duration mode for new events
 
         // If duration is less than 1 month (e.g., "1d", "5d", "2w"), default to 1 month
         let defaultDuration = "1m";
@@ -98,6 +84,28 @@ export function EventModal({
             }
           }
         }
+
+        // Calculate the correct end date based on the corrected duration
+        const correctedEndDate =
+          parseDurationAndCalculateEndDate(
+            initialData.startDate || toISODateString(new Date()),
+            defaultDuration
+          ) ||
+          initialData.endDate ||
+          initialData.startDate ||
+          toISODateString(new Date());
+
+        setFormData({
+          name: initialData.name || "",
+          startDate: initialData.startDate || toISODateString(new Date()),
+          endDate: correctedEndDate,
+          color: initialData.color || EVENT_COLORS[0],
+          calendarId:
+            initialData.calendarId || activeCalendarId || DEFAULT_CALENDAR_ID,
+          duration: defaultDuration,
+        });
+        setIsManualColorChange(false); // New event, allow auto color matching
+        setUseDurationMode(true); // Default to duration mode for new events
         setDurationInput(defaultDuration);
       }
       setErrors([]);
