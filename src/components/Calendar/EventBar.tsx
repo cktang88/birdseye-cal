@@ -95,6 +95,9 @@ export function EventBar({
   // Get darker text color based on background color (Apple Calendar style)
   const textColor = getDarkerTextColor(event.color);
 
+  // Minimum width for clickability/visibility
+  const MIN_WIDTH_PX = 16;
+
   return (
     <div
       className="absolute cursor-pointer hover:opacity-80 transition-opacity overflow-hidden pointer-events-auto flex items-center select-none"
@@ -102,6 +105,7 @@ export function EventBar({
         backgroundColor: event.color,
         left: `${leftPercent}%`,
         width: `${widthPercent}%`,
+        minWidth: `${MIN_WIDTH_PX}px`,
         top: `${top}px`,
         height: `${eventHeight}px`,
         borderRadius,
