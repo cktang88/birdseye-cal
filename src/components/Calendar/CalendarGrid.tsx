@@ -203,7 +203,8 @@ export function CalendarGrid({
                     {events.map((event) => {
                       const layoutInfo = eventLayoutByYear.get(year);
                       const lane = layoutInfo?.laneMap.get(event.id) ?? 0;
-                      const maxLanesUsed = layoutInfo?.maxLanesUsed ?? 1;
+                      const maxLanesUsed =
+                        layoutInfo?.maxLanesPerEvent.get(event.id) ?? 1;
                       return (
                         <EventBar
                           key={event.id}

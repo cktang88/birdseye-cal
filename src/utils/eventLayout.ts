@@ -4,6 +4,7 @@ import { fromISODateString, getGridPosition } from "./dateHelpers";
 export type EventLayoutInfo = {
   laneMap: Map<string, number>;
   maxLanesUsed: number; // Maximum number of overlapping events (1-6)
+  maxLanesPerEvent: Map<string, number>; // Max lanes for each event based on actual overlaps
 };
 
 /**
@@ -16,6 +17,7 @@ export function calculateEventLanes(
   year: number
 ): EventLayoutInfo {
   const laneMap = new Map<string, number>();
+  const maxLanesPerEvent = new Map<string, number>();
   let maxLanesUsed = 0;
 
   // Filter events that appear in this year and sort by start position
@@ -45,43 +47,133 @@ export function calculateEventLanes(
     })
     .filter((e) => e !== null)
     .sort((a, b) => {
-      // Sort by actual start date, not just month
-      return a!.startDate.localeCompare(b!.startDate);
+      // Sort by actual start date first
+      const startCompare = a!.startDate.localeCompare(b!.startDate);
+      if (startCompare !== 0) return startCompare;
+      
+      // If start dates are the same, sort by end date (longer events first)
+      const endCompare = b!.endDate.localeCompare(a!.endDate);
+      if (endCompare !== 0) return endCompare;
+      
+      // If both start and end are the same, sort by event ID for deterministic ordering
+      return a!.event.id.localeCompare(b!.event.id);
     });
 
-  // Track which lanes are occupied by actual end dates
-  // lanes[i] = endDate (ISO string) of the event currently occupying lane i (or null if free)
-  const lanes: (string | null)[] = [null, null, null, null, null, null]; // Support up to 6 lanes
-
-  for (const item of yearEvents) {
+  // For each event, check which lanes are occupied by events that would overlap with it
+  for (let i = 0; i < yearEvents.length; i++) {
+    const item = yearEvents[i];
     if (!item) continue;
 
     const { event, startDate, endDate } = item;
 
-    // Find the first available lane (topmost lane that's free)
-    let assignedLane = -1;
-    for (let lane = 0; lane < lanes.length; lane++) {
-      // A lane is free if it's empty or if the previous event's end date
-      // is before or on the same day as the current event's start date
-      // (events touching on the same day should not overlap)
-      if (lanes[lane] === null || lanes[lane]! <= startDate) {
-        // This lane is free at the start date
-        assignedLane = lane;
-        lanes[lane] = endDate;
-        break;
+    // Check which lanes are already occupied by events that overlap with this one
+    const occupiedLanes = new Set<number>();
+    for (let j = 0; j < i; j++) {
+      const otherItem = yearEvents[j];
+      if (!otherItem) continue;
+
+      // Check if this event overlaps with the other event
+      // Events overlap if they share any day: startA <= endB AND startB <= endA
+      // Using <= handles single-day events correctly
+      if (startDate <= otherItem.endDate && otherItem.startDate <= endDate) {
+        const otherLane = laneMap.get(otherItem.event.id);
+        if (otherLane !== undefined) {
+          occupiedLanes.add(otherLane);
+        }
       }
     }
 
-    // If no lane found, assign to lane 0 (will overlap, but better than nothing)
-    if (assignedLane === -1) {
-      assignedLane = 0;
-      lanes[0] = endDate;
+    // Find the first available lane (lowest number not in occupiedLanes)
+    let assignedLane = 0;
+    while (occupiedLanes.has(assignedLane) && assignedLane < 6) {
+      assignedLane++;
     }
 
     laneMap.set(event.id, assignedLane);
     maxLanesUsed = Math.max(maxLanesUsed, assignedLane + 1);
   }
 
-  return { laneMap, maxLanesUsed: maxLanesUsed || 1 };
+  // Second pass: Group events into overlap clusters
+  // Events in the same cluster (transitively overlapping) should have the same height
+  const eventGroups: Set<Set<number>> = new Set();
+  const eventToGroup = new Map<number, Set<number>>();
+
+  for (let i = 0; i < yearEvents.length; i++) {
+    const item = yearEvents[i];
+    if (!item) continue;
+
+    // Find all events that directly overlap with this event
+    const overlappingIndices = new Set<number>([i]);
+    for (let j = 0; j < yearEvents.length; j++) {
+      if (i === j) continue;
+      const otherItem = yearEvents[j];
+      if (!otherItem) continue;
+
+      // Check if the two events overlap (share any day)
+      // Events overlap if: startA <= endB AND startB <= endA
+      // Using <= handles single-day events correctly
+      if (item.startDate <= otherItem.endDate && otherItem.startDate <= item.endDate) {
+        overlappingIndices.add(j);
+      }
+    }
+
+    // Merge with existing groups if any of the overlapping events are already in a group
+    let targetGroup: Set<number> | null = null;
+    for (const idx of overlappingIndices) {
+      if (eventToGroup.has(idx)) {
+        const existingGroup = eventToGroup.get(idx)!;
+        if (targetGroup === null) {
+          targetGroup = existingGroup;
+        } else if (targetGroup !== existingGroup) {
+          // Merge two groups
+          for (const memberIdx of existingGroup) {
+            targetGroup.add(memberIdx);
+            eventToGroup.set(memberIdx, targetGroup);
+          }
+          eventGroups.delete(existingGroup);
+        }
+      }
+    }
+
+    // If no existing group found, create a new one
+    if (targetGroup === null) {
+      targetGroup = new Set<number>();
+      eventGroups.add(targetGroup);
+    }
+
+    // Add all overlapping events to the target group
+    for (const idx of overlappingIndices) {
+      targetGroup.add(idx);
+      eventToGroup.set(idx, targetGroup);
+    }
+  }
+
+  // Calculate max lanes for each group
+  const groupMaxLanes = new Map<Set<number>, number>();
+  for (const group of eventGroups) {
+    let maxLanes = 1;
+    for (const idx of group) {
+      const item = yearEvents[idx];
+      if (!item) continue;
+      const lane = laneMap.get(item.event.id) ?? 0;
+      maxLanes = Math.max(maxLanes, lane + 1);
+    }
+    groupMaxLanes.set(group, maxLanes);
+  }
+
+  // Assign max lanes to each event based on its group
+  for (let i = 0; i < yearEvents.length; i++) {
+    const item = yearEvents[i];
+    if (!item) continue;
+    const group = eventToGroup.get(i);
+    if (group) {
+      const maxLanes = groupMaxLanes.get(group) ?? 1;
+      maxLanesPerEvent.set(item.event.id, maxLanes);
+    } else {
+      maxLanesPerEvent.set(item.event.id, 1);
+    }
+  }
+
+  return { laneMap, maxLanesUsed: maxLanesUsed || 1, maxLanesPerEvent };
 }
 
