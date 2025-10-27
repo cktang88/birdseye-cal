@@ -92,9 +92,8 @@ input, textarea, [contenteditable="true"] {
 
 /* Calendar cells - use CSS Grid for responsive sizing */
 .calendar-cell {
-  /* Height scales based on width to maintain aspect ratio */
-  aspect-ratio: 1.28; /* 128/100 = 1.28 */
-  min-height: 60px; /* Minimum readable height */
+  /* Fixed height - independent of width */
+  height: var(--cell-height);
   position: relative;
 }
 
