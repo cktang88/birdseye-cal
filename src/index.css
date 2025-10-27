@@ -53,7 +53,7 @@ input, textarea, [contenteditable="true"] {
 
 .calendar-months-header {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(12, minmax(60px, 1fr));
   flex: 1;
 }
 
@@ -86,7 +86,7 @@ input, textarea, [contenteditable="true"] {
 .calendar-months-row {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
+  grid-template-columns: repeat(12, minmax(60px, 1fr));
   flex: 1;
 }
 
