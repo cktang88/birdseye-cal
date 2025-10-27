@@ -54,13 +54,24 @@ export function EventBar({
 
   // Width calculation as percentage:
   // Total months spanned, adjusted for fractional start and end
-  const monthsSpanned =
+  let monthsSpanned =
     barEndMonth - barStartMonth + 1 - startFraction + endFraction - 1;
+
+  // Normalize 1-month events to exactly 1.0 to ensure consistent visual length
+  // Check if this is approximately a 1-month event (within a small tolerance)
+  const MONTH_TOLERANCE = 0.1; // 10% tolerance (~3 days)
+  if (
+    monthsSpanned >= 1.0 - MONTH_TOLERANCE &&
+    monthsSpanned <= 1.0 + MONTH_TOLERANCE
+  ) {
+    monthsSpanned = 1.0;
+  }
+
   const widthPercent = (monthsSpanned / 12) * 100 - 0.2; // Subtract small gap
 
   // Calculate dynamic height based on number of overlapping events
   // Minimum of 2 lanes to ensure single events are 50% of max height
-  const eventHeight = LANE_HEIGHT_PX / Math.max(maxLanesUsed, 3);
+  const eventHeight = LANE_HEIGHT_PX / Math.max(maxLanesUsed, 4);
 
   // Calculate vertical position based on lane
   const top = lane * eventHeight + LANE_TOP_OFFSET_PX;

@@ -12,7 +12,7 @@ export const CELL_GAP_PX = 0; // No gap between month cells
 export const CELL_TOTAL_WIDTH_PX = CELL_WIDTH_PX + CELL_GAP_PX; // 128px
 
 // Event bar dimensions
-export const LANE_HEIGHT_PX = 84; // Height for event lanes (divided by number of overlapping events, supports up to 6)
+export const LANE_HEIGHT_PX = 120; // Height for event lanes (divided by number of overlapping events, supports up to 6)
 export const LANE_TOP_OFFSET_PX = 4; // Top padding before first lane
 
 // Color palette for events (Apple Calendar inspired colors - lighter/pastel versions)
