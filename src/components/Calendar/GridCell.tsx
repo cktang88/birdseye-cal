@@ -50,7 +50,7 @@ export function GridCell({
       title={`Year ${cell.year}, Month ${cell.month}`}
     >
       {age !== null && (
-        <div className="absolute top-1 right-1 text-xs font-semibold text-purple-600 bg-purple-50 rounded-full w-5 h-5 flex items-center justify-center border border-purple-200 z-50 select-none">
+        <div className="absolute top-1 right-1 text-xs font-semibold text-purple-600 bg-purple-50 rounded-full w-5 h-5 flex items-center justify-center border border-purple-200 z-5 select-none">
           {age}
         </div>
       )}

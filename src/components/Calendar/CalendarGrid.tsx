@@ -139,83 +139,90 @@ export function CalendarGrid({
   const monthNames = useMemo(() => getMonthNames(), []);
 
   return (
-    <div
-      className="overflow-auto p-4"
-      onMouseUp={handleContainerMouseUp}
-      onMouseLeave={handleContainerMouseUp}
-    >
-      <div className="calendar-container">
-        {/* Header: Month labels */}
-        <div className="calendar-header mb-2">
-          <div className="calendar-year-label" /> {/* Year label space */}
-          <div className="calendar-months-header">
-            {monthNames.map((monthName, index) => (
-              <div
-                key={index}
-                className="calendar-month-label text-xs text-gray-600 text-center"
-              >
-                {monthName}
-              </div>
-            ))}
+    <>
+      {/* Sticky Months Header */}
+      <div className="sticky top-0 z-10 bg-white border-b-2 border-gray-300 px-4 py-3 shadow-md">
+        <div className="calendar-container">
+          <div className="calendar-header">
+            <div className="calendar-year-label" /> {/* Year label space */}
+            <div className="calendar-months-header">
+              {monthNames.map((monthName, index) => (
+                <div
+                  key={index}
+                  className="calendar-month-label text-xs text-gray-700 text-center font-semibold"
+                >
+                  {monthName}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Grid rows by year */}
-        {years.map((year, yearIndex) => {
-          const cells = cellsByYear.get(year)!;
-          const isEvenYear = yearIndex % 2 === 0;
+      {/* Calendar Content */}
+      <div
+        className="px-4 pb-4"
+        onMouseUp={handleContainerMouseUp}
+        onMouseLeave={handleContainerMouseUp}
+      >
+        <div className="calendar-container">
+          {/* Grid rows by year */}
+          {years.map((year, yearIndex) => {
+            const cells = cellsByYear.get(year)!;
+            const isEvenYear = yearIndex % 2 === 0;
 
-          return (
-            <div
-              key={year}
-              className={`calendar-year-row ${
-                yearIndex > 0 ? "border-t-2 border-gray-400" : "mb-4"
-              } ${isEvenYear ? "bg-gray-50" : "bg-white"} -mx-4 px-4 py-8`}
-            >
-              {/* Year label */}
-              <div className="calendar-year-label text-base font-bold text-gray-800 pr-2 text-right select-none">
-                {year}
-              </div>
+            return (
+              <div
+                key={year}
+                className={`calendar-year-row ${
+                  yearIndex > 0 ? "border-t-2 border-gray-400" : "mt-4"
+                } ${isEvenYear ? "bg-gray-50" : "bg-white"} -mx-4 px-4 py-8`}
+              >
+                {/* Year label */}
+                <div className="calendar-year-label text-base font-bold text-gray-800 pr-2 text-right select-none">
+                  {year}
+                </div>
 
-              {/* Month cells with event bars overlay */}
-              <div className="calendar-months-row">
-                {cells.map((cell) => (
-                  <GridCell
-                    key={`${cell.year}-${cell.month}`}
-                    cell={cell}
-                    birthday={birthday}
-                    onCellClick={handleCellClick}
-                    onCellMouseDown={handleCellMouseDown}
-                    onCellMouseEnter={handleCellMouseEnter}
-                    onCellMouseUp={handleCellMouseUp}
-                    isInDragSelection={isCellInDragSelection(cell)}
-                  />
-                ))}
+                {/* Month cells with event bars overlay */}
+                <div className="calendar-months-row">
+                  {cells.map((cell) => (
+                    <GridCell
+                      key={`${cell.year}-${cell.month}`}
+                      cell={cell}
+                      birthday={birthday}
+                      onCellClick={handleCellClick}
+                      onCellMouseDown={handleCellMouseDown}
+                      onCellMouseEnter={handleCellMouseEnter}
+                      onCellMouseUp={handleCellMouseUp}
+                      isInDragSelection={isCellInDragSelection(cell)}
+                    />
+                  ))}
 
-                {/* Event bars overlay for this year */}
-                <div className="absolute inset-0 pointer-events-none">
-                  {events.map((event) => {
-                    const layoutInfo = eventLayoutByYear.get(year);
-                    const lane = layoutInfo?.laneMap.get(event.id) ?? 0;
-                    const maxLanesUsed = layoutInfo?.maxLanesUsed ?? 1;
-                    return (
-                      <EventBar
-                        key={event.id}
-                        event={event}
-                        year={year}
-                        maxMonths={maxMonths}
-                        lane={lane}
-                        maxLanesUsed={maxLanesUsed}
-                        onEventClick={onEventClick}
-                      />
-                    );
-                  })}
+                  {/* Event bars overlay for this year */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {events.map((event) => {
+                      const layoutInfo = eventLayoutByYear.get(year);
+                      const lane = layoutInfo?.laneMap.get(event.id) ?? 0;
+                      const maxLanesUsed = layoutInfo?.maxLanesUsed ?? 1;
+                      return (
+                        <EventBar
+                          key={event.id}
+                          event={event}
+                          year={year}
+                          maxMonths={maxMonths}
+                          lane={lane}
+                          maxLanesUsed={maxLanesUsed}
+                          onEventClick={onEventClick}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

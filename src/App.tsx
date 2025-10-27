@@ -100,9 +100,9 @@ function App() {
   }, [filteredEvents, yearRange]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="shrink-0 bg-white border-b border-gray-200 px-6 py-4 z-20">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">
@@ -154,8 +154,8 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main>
+      {/* Main Content - Scrollable */}
+      <main className="flex-1 overflow-y-auto">
         {/* Calendar Grid with integrated event bars */}
         <CalendarGrid
           startYear={yearRange.start}
